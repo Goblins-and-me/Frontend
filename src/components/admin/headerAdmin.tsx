@@ -1,11 +1,11 @@
 import Image from "next/image";
-import Link from "next/link";         //для работы линки 
+import Link from "next/link";
 
 export default function Header() {
   return (
     <div className="flex justify-between">
       <div className="flex">
-        <Link href="/admin" className="w-6 h-6 relative">   {/* сама линка для перехода на админку можешь если хочешь заменить на хук */}
+        <Link href="/catalog" className="w-6 h-6 relative">
           <Image
             src="/burger.svg"
             fill
