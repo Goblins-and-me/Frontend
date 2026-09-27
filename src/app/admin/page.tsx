@@ -1,6 +1,8 @@
 import CakeCard from '@/components/admin/CakeCardAdmin';
 import Header from '@/components/admin/headerAdmin';
 import Link from 'next/link';
+import CreateNewCakeCard from '@/components/admin/CreateNewCakeCardAdmin';
+
 
 const cards = [
   {
@@ -36,6 +38,7 @@ export default function Catalog() {
     <div className='min-w-screen min-h-screen bg-catalog p-4'>
       <Header />
       <div className='grid grid-cols-2 gap-4 mt-10'>
+        <CreateNewCakeCard />
         {
           cards.map((element, index) =>(
             <CakeCard

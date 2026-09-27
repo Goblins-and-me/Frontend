@@ -4,6 +4,8 @@
     /* Цвета */
     --color-catalog: #f0f0f0;
     --color-main: #A49F97;
+    --color-createNewCakeBG: #DDE1EC;       /* кнопка*/
+    --color-createNewCakeBotom: #F5F5F5;    /* создания нового торта в админке*/
 
     /* Градиент */
     --gradient-main: linear-gradient(rgba(164, 159, 151, 1) 0%, rgba(188, 185, 177, 1) 50%, rgba(198, 191, 182, 1) 100%);
