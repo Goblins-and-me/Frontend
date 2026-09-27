@@ -2,6 +2,7 @@ import CakeCard from '@/components/admin/CakeCardAdmin';
 import Header from '@/components/admin/headerAdmin';
 import Link from 'next/link';
 import CreateNewCakeCard from '@/components/admin/CreateNewCakeCardAdmin';
+import AdminSideBar from '@/components/admin/AdminSidebar';
 
 
 const cards = [
@@ -35,23 +36,28 @@ const cards = [
 
 export default function Catalog() {
   return (
-    <div className='min-w-screen min-h-screen bg-catalog p-4'>
-      <Header />
-      <div className='grid grid-cols-2 gap-4 mt-10'>
-        <CreateNewCakeCard />
-        {
-          cards.map((element, index) =>(
-            <CakeCard
-              key={index}
-              id={element.id}
-              name={element.name}
-              price={element.price}
-              image={element.image}
-              flavor={element.flavor}
-              backgroundColor={element.backgroundColor}
-            />
-          ))
-        }
+    <div className='min-w-screen min-h-screen bg-catalog'>
+      <div className='grid grid-cols-[67fr_107fr]'>
+        <AdminSideBar />
+        <div className='p-4'>             {/*САМА СТРАНИЦА*/}
+          <Header />
+          <div className='grid grid-cols-2 gap-4 mt-10'>
+            <CreateNewCakeCard />
+            {
+              cards.map((element, index) =>(            
+                <CakeCard
+                  key={index}
+                  id={element.id}         
+                  name={element.name}
+                  price={element.price}
+                  image={element.image}
+                  flavor={element.flavor}
+                  backgroundColor={element.backgroundColor}
+                />
+              ))
+            }
+          </div>
+        </div>
       </div>
     </div>
   )
