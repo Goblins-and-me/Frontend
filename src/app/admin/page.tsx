@@ -36,7 +36,7 @@ const cards = [
 
 export default function Catalog() {
   return (
-    <div className='min-w-screen min-h-screen bg-catalog'>
+    <div className='min-w-[904px] min-h-screen bg-catalog'>
       <div className='grid grid-cols-[67fr_107fr]'>
         <AdminSideBar />
         <div className='p-4'>             {/*САМА СТРАНИЦА*/}
