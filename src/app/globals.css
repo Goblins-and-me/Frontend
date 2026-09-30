@@ -8,6 +8,8 @@
     --color-adminBG: #DDE1EC;               /**/
     --color-createNewCakeBotom: #F5F5F5;    /* BG также цвет панели админа*/
 
+    --color-orderBg: #FAF6F0;
+
     /* Градиент */
     --gradient-main: linear-gradient(rgba(164, 159, 151, 1) 0%, rgba(188, 185, 177, 1) 50%, rgba(198, 191, 182, 1) 100%);
 
