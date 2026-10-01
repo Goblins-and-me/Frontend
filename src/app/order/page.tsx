@@ -1,5 +1,5 @@
 export default function Order() {
     return(
-        <p>order is working</p>
+        <p className="font-inter">order is working</p>
     )
 }
