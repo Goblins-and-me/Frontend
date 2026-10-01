@@ -3,16 +3,27 @@
 @theme {
     /* Цвета */
     --color-catalog: #f0f0f0;
-    --color-main: #A49F97;
+    --color-main: #2B1E19;
+    --color-second: #7A6558;
+    --color-separators: #C4B2A6;
+    --color-accent: #FF949A;
+    --color-card: #FFE6E8;
+    --color-screen: #FAF6F0;
+    --color-input: #FAF6F0;
+    --color-calendar-free: #22C55E;
+    --color-calendar-partical: #F59E0B;
+    --color-deleting: #FF5252;
 
     /* Градиент */
-    --gradient-main: linear-gradient(rgba(164, 159, 151, 1) 0%, rgba(188, 185, 177, 1) 50%, rgba(198, 191, 182, 1) 100%);
+    /* --gradient-main: linear-gradient(rgba(164, 159, 151, 1) 0%, rgba(188, 185, 177, 1) 50%, rgba(198, 191, 182, 1) 100%); */
 
     /* Фон */
-    --background-image-main: url('/main_background.png'); /* Изменено имя переменной */
+    /* --background-image-main: url('/main_background.png'); Изменено имя переменной */
 
     /* Шрифты Next.js (связываем с нашей переменной --font-futura) */
-    --font-main: var(--font-futura), sans-serif;
-    --font-second: var(--font-futura), sans-serif; /* Для жирного просто используйте класс font-semibold */
-    --font-third: var(--font-inter), sans-serif; /* Если Inter тоже подключается через next/font */
+    --font-inter: var(--font-inter), sans-serif;
+    
+    
 }
+
+
