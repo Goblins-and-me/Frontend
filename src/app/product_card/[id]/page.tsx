@@ -49,7 +49,7 @@ export default function ProductPage() {
 
   return (
     <div className="h-screen w-screen bg-[#FAF6F0] flex justify-center items-center overflow-hidden antialiased">
-      <main className={`w-full max-w-[100%] h-full bg-[#FAF6F0] grid overflow-hidden transition-all duration-300 ${isConfiguring ? 'grid-rows-[auto_1fr]' : 'grid-rows-[auto_1fr_auto]'}`}>
+      <main className={`w-full max-w-full h-full bg-[#FAF6F0] grid overflow-hidden transition-all duration-300 ${isConfiguring ? 'grid-rows-[auto_1fr]' : 'grid-rows-[auto_1fr_auto]'}`}>
 
         <header className="flex items-center justify-between px-6 pt-5 pb-3">
           <Link href="/catalog" className="w-10 h-10 flex items-center justify-start text-[#2C211A] hover:opacity-70 transition" aria-label="Назад">
@@ -70,13 +70,12 @@ export default function ProductPage() {
         <div className="px-6 pb-4 grid grid-rows-[1fr_auto] min-h-0 overflow-hidden">
           <div className="grid grid-rows-[auto_1fr] min-h-0 items-start content-start">
 
-            <div className="relative w-full aspect-[5/2] min-h-[120px] rounded-[24px] mb-4 select-none overflow-hidden">
+            <div className="relative w-full aspect-5/2 rounded-6 mb-4 select-none overflow-hidden">
               {product.image && (
                 <Image
                   src={product.image}
                   alt={product.title}
                   fill
-                  sizes="(max-width: 480px) 100vw, 450px"
                   className="object-contain object-center pointer-events-none"
                   priority
                 />
@@ -84,7 +83,7 @@ export default function ProductPage() {
             </div>
 
             {!isConfiguring ? (
-              <section className="overflow-y-auto max-h-[100%] pr-1">
+              <section className="overflow-y-auto max-h-full pr-1">
                 <h2 className="text-xl font-black mb-1.5 text-[#1F1610] tracking-tight">{product.title}</h2>
                 <p className="text-[13px] leading-[1.4] text-[#7A6E65] font-normal">
                   {product.description}
