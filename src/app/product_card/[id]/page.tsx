@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from "react";
 import Image from "next/image";
+import { ChevronLeft, Heart, Check } from 'lucide-react';
 
 interface Product {
   title: string;
@@ -21,6 +22,8 @@ export default function ProductPage() {
     photo: false,
   });
   const [isConfiguring, setIsConfiguring] = useState<boolean>(false);
+
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   const handleDecorChange = (id: string) => {
     setDecor(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }));
@@ -47,28 +50,33 @@ export default function ProductPage() {
     image: '/cake.png',
   };
 
-   return (
+  return (
     <div className="h-screen w-screen bg-screen flex justify-center items-center overflow-hidden antialiased">
-      <main className={`w-full max-w-full h-full bg-screen grid overflow-hidden transition-all duration-300 ${isConfiguring ? 'grid-rows-[auto_1fr]' : 'grid-rows-[auto_1fr_auto]'}`}>
+      <main className={`w-full max-w-full h-full bg-screen grid overflow-hidden transition-all duration-300 ${isConfiguring ? 'grid-rows-auto_1fr' : 'grid-rows-auto_1fr_auto'}`}>
 
         <header className="flex items-center justify-between px-6 pt-5 pb-3">
           <Link href="/catalog" className="w-10 h-10 flex items-center justify-start text-main hover:opacity-70 transition" aria-label="Назад">
-            <svg fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-            </svg>
+            <ChevronLeft className="w-6 h-6" strokeWidth={2} />
           </Link>
           <h1 className="text-lg font-bold tracking-wide text-main">
             {isConfiguring ? 'Настройка торта' : 'Карточка товара'}
           </h1>
-          <button className="w-10 h-10 flex items-center justify-end text-main hover:opacity-70 transition" aria-label="В избранное">
-            <svg fill="none" viewBox="0 0 24 24" strokeWidth="1.8" stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-            </svg>
+
+          <button
+            onClick={() => setIsFavorite(!isFavorite)}
+            className="w-10 h-10 flex items-center justify-end text-main hover:opacity-70 transition"
+            aria-label="В избранное"
+          >
+            <Heart
+              className={`w-6 h-6 transition-colors duration-200 ${isFavorite ? 'text-red-500' : 'text-main'}`}
+              strokeWidth={1.8}
+              fill={isFavorite ? 'currentColor' : 'none'}
+            />
           </button>
         </header>
 
-        <div className="px-6 pb-4 grid grid-rows-[1fr_auto] min-h-0 overflow-hidden">
-          <div className="grid grid-rows-[auto_1fr] min-h-0 items-start content-start">
+        <div className="px-6 pb-4 grid grid-rows-1fr_auto min-h-0 overflow-hidden">
+          <div className="grid grid-rows-auto_1fr min-h-0 items-start content-start">
 
             <div className="relative w-full h-64 max-h-64 rounded-2xl mb-4 select-none overflow-hidden bg-neutral-50 flex items-center justify-center">
               {product.image && (
@@ -118,8 +126,6 @@ export default function ProductPage() {
                       />
                       <span>5 кг</span>
                     </div>
-                    <p className="text-10px text-neutral-400 mt-3 leading-tight">
-                    </p>
                   </div>
 
                   <div className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm">
@@ -173,9 +179,7 @@ export default function ProductPage() {
                                 : 'border-separators bg-white group-hover:border-accent'
                                 }`}>
                                 {isChecked && (
-                                  <svg fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="white" className="w-3.5 h-3.5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                  </svg>
+                                  <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
                                 )}
                               </div>
                               <span className="text-xs font-semibold text-main">{decorItem.title}</span>
@@ -224,5 +228,4 @@ export default function ProductPage() {
       </main>
     </div>
   );
-
 }
