@@ -1,6 +1,5 @@
 import CakeCard from '@/components/catalog/CakeCard';
 import Header from '@/components/catalog/header';
-import Link from 'next/link';
 
 const cards = [
   {

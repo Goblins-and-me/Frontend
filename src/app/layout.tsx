@@ -13,57 +13,71 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const futura = localFont({
+// const futura = localFont({
+//   src: [
+//     // --- LIGHT (300) ---
+//     {
+//       path: './fonts/Futura/FuturaLightC.woff',
+//       weight: '300',
+//       style: 'normal',
+//     },
+//     {
+//       path: './fonts/Futura/FuturaLightC-Italic.woff',
+//       weight: '300',
+//       style: 'italic',
+//     },
+
+//     // --- BOOK / REGULAR (400) ---
+//     {
+//       path: './fonts/Futura/FuturaBookC.woff',
+//       weight: '400',
+//       style: 'normal',
+//     },
+//     {
+//       path: './fonts/Futura/FuturaBookC-Italic.woff',
+//       weight: '400',
+//       style: 'italic',
+//     },
+
+//     // --- MEDIUM (500) ---
+//     {
+//       path: './fonts/Futura/FuturaMediumC.woff',
+//       weight: '500',
+//       style: 'normal',
+//     },
+//     {
+//       path: './fonts/Futura/FuturaMediumC-Italic.woff',
+//       weight: '500',
+//       style: 'italic',
+//     },
+
+//     // --- DEMI / SEMIBOLD (600) ---
+//     {
+//       path: './fonts/Futura/FuturaDemiC.woff',
+//       weight: '600', // Для Demi лучше использовать 600 (Semibold)
+//       style: 'normal',
+//     },
+//     {
+//       path: './fonts/Futura/FuturaDemiC-Italic.woff',
+//       weight: '600',
+//       style: 'italic',
+//     },
+//   ],
+//   variable: '--font-futura', // Имя CSS-переменной для интеграции с Tailwind
+// })
+
+const inter = localFont({
   src: [
-    // --- LIGHT (300) ---
     {
-      path: './fonts/Futura/FuturaLightC.woff',
-      weight: '300',
+      path: './fonts/Inter/Inter-VariableFont_opsz,wght.ttf',
       style: 'normal',
     },
     {
-      path: './fonts/Futura/FuturaLightC-Italic.woff',
-      weight: '300',
-      style: 'italic',
-    },
-
-    // --- BOOK / REGULAR (400) ---
-    {
-      path: './fonts/Futura/FuturaBookC.woff',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: './fonts/Futura/FuturaBookC-Italic.woff',
-      weight: '400',
-      style: 'italic',
-    },
-
-    // --- MEDIUM (500) ---
-    {
-      path: './fonts/Futura/FuturaMediumC.woff',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: './fonts/Futura/FuturaMediumC-Italic.woff',
-      weight: '500',
-      style: 'italic',
-    },
-
-    // --- DEMI / SEMIBOLD (600) ---
-    {
-      path: './fonts/Futura/FuturaDemiC.woff',
-      weight: '600', // Для Demi лучше использовать 600 (Semibold)
-      style: 'normal',
-    },
-    {
-      path: './fonts/Futura/FuturaDemiC-Italic.woff',
-      weight: '600',
+      path: './fonts/Inter/Inter-Italic-VariableFont_opsz,wght.ttf',
       style: 'italic',
     },
   ],
-  variable: '--font-futura', // Имя CSS-переменной для интеграции с Tailwind
+  variable: '--font-inter',
 })
 
 export const metadata: Metadata = {
@@ -75,7 +89,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${futura.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
