@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Gauge, Calendar, Image as GalleryIcon, ShoppingBag, Users } from "lucide-react";
 
-export default function AdminSidebar() {
+export default function Sidebar() {
   const pathname = usePathname();
 
   // Массив пунктов меню для удобного рендеринга
@@ -17,7 +17,7 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="w-30 min-h-screen bg-[#EFE8E0] flex flex-col items-center py-8 gap-6 shadow-sm">
+    <aside className="w-30 bg-[#EFE8E0] flex flex-col items-center px-4 py-8 gap-5 shadow-sm">
       {menuItems.map((item) => {
         // Проверяем, активна ли текущая вкладка
         const isActive = pathname === item.href;
@@ -27,7 +27,7 @@ export default function AdminSidebar() {
           <Link
             key={item.href}
             href={item.href}
-            className={`w-22.5 h-22.5 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all duration-200
+            className={`w-full py-4 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all duration-200
               ${
                 isActive
                   ? "bg-white text-[#E47C7C] shadow-sm" // Стили для активной кнопки (белый фон, розоватый текст/иконка)
@@ -38,7 +38,7 @@ export default function AdminSidebar() {
             <div className="w-6 h-6 flex items-center justify-center">
               <Icon className="w-5 h-5 transition-colors duration-200" />
             </div>
-            
+
             {/* Текст пункта меню */}
             <span className="text-[11px] font-medium tracking-wide text-center">
               {item.name}

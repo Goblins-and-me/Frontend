@@ -13,6 +13,7 @@
     --color-calendar-free: #22C55E;
     --color-calendar-partical: #F59E0B;
     --color-deleting: #FF5252;
+    --color-border: #EADCC9;
 
     /* Градиент */
     /* --gradient-main: linear-gradient(rgba(164, 159, 151, 1) 0%, rgba(188, 185, 177, 1) 50%, rgba(198, 191, 182, 1) 100%); */
@@ -22,9 +23,6 @@
 
     /* Шрифты Next.js (связываем с нашей переменной --font-futura) */
     --font-inter: var(--font-inter), sans-serif;
-    
-    
+
+
 }
-
-
-
