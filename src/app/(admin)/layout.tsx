@@ -1,4 +1,4 @@
-import AdminSidebar from '@/components/admin/Sidebar';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 import Header from '@/components/admin/Header';
 import '@/app/globals.css';
 
