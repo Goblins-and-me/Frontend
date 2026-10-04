@@ -1,60 +1,61 @@
 import { test, expect } from '@playwright/test';
 
-// Базовый URL твоего локального сайта (обычно localhost:3000)
-const BASE_URL = 'http://localhost:3000';
+const PRODUCT_URL = 'http://localhost:3000/product_card/1';
 
-test.describe('Тестирование страницы товара', () => {
+test.describe('Страница товара', () => {
 
-  // ТЕСТ 1: Страница загружается и не падает
-  test('Страница товара открывается без ошибок', async ({ page }) => {
-    // Открываем любой товар (например, id=1)
-    await page.goto(`${BASE_URL}/product/1`);
-    
-    // Проверяем, что основной контент виден (замени 'main' на реальный селектор)
-    await expect(page.locator('main')).toBeVisible();
+  test('Загрузка, дизайн и дефолтная цена', async ({ page }) => {
+    await page.goto(PRODUCT_URL);
+
+    await expect(page.getByRole('heading', { name: 'Карточка товара' })).toBeVisible();
+
+    const configBtn = page.getByRole('button', { name: 'Настроить' });
+    await expect(configBtn).toBeVisible();
+    await expect(configBtn).toHaveCSS('background-color', 'rgb(255, 148, 154)');
+
+    // Цена по умолчанию: 2.5 * 60 + 15 (ягоды) = 165 BYN
+    await expect(page.locator('footer').getByText('165 BYN')).toBeVisible();
   });
 
-  // ТЕСТ 2: Проверка дизайна (цвета)
-  test('Проверка соответствия цветов дизайну', async ({ page }) => {
-    await page.goto(`${BASE_URL}/product/1`);
-
-    // ЗДЕСЬ НУЖНО ВПИСАТЬ СЕЛЕКТОРЫ И ЦВЕТА ИЗ КОММЕНТАРИЕВ НИКИТОСА
-    // Пример (раскомментируй и замени):
-    /*
-    const buttonColor = await page.locator('.buy-button').evaluate(el => getComputedStyle(el).backgroundColor);
-    expect(buttonColor).toBe('rgb(255, 0, 0)'); // Красный цвет
+  test('Настройка торта и пересчет цены', async ({ page }) => {
+    await page.goto(PRODUCT_URL);
     
-    const titleColor = await page.locator('h1').evaluate(el => getComputedStyle(el).color);
-    expect(titleColor).toBe('rgb(0, 0, 0)'); // Черный цвет
-    */
-  });
+    await page.getByRole('button', { name: 'Настроить' }).click();
 
-  // ТЕСТ 3: Переход на другие товары (проверка навигации)
-  test('Переход между разными товарами не ломает сайт', async ({ page }) => {
-    // Открываем каталог
-    await page.goto(`${BASE_URL}/catalog`);
+    // 1. Меняем вес на 5 кг (надежный способ для React)
+    const slider = page.locator('input[type="range"]');
+    await slider.evaluate((e: HTMLInputElement) => {
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype, "value"
+      )?.set;
+      if (nativeInputValueSetter) {
+        nativeInputValueSetter.call(e, '5');
+      }
+      e.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    // Проверяем, что вес действительно стал 5 кг (берем первый элемент, так как второй — это подпись шкалы)
+    await expect(page.getByText('5 кг').first()).toBeVisible();
     
-    // Находим все карточки товаров (замени .product-card на реальный класс)
-    const productCards = page.locator('.product-card'); 
-    const count = await productCards.count();
+    // 2. Выбираем начинку "Манго-Маракуйя" (+8 BYN/кг)
+    await page.getByRole('button', { name: /Манго-Маракуйя/ }).click();
 
-    // Проверяем первые 3 товара (чтобы не гонять 100 штук)
-    for (let i = 0; i < Math.min(count, 3); i++) {
-        // Кликаем по карточке
-        await productCards.nth(i).click();
-        
-        // Ждем загрузки страницы
-        await page.waitForLoadState('networkidle');
+    // 3. Снимаем галочку "Свежие ягоды" (-15 BYN)
+    await page.locator('label').filter({ hasText: 'Свежие ягоды' }).click();
 
-        // Проверяем, что URL изменился на страницу товара (содержит /product/)
-        await expect(page).toHaveURL(/.*\/product\/.+/);
+    // Проверяем, что галочка действительно снята
+    const berriesCheckbox = page.locator('label').filter({ hasText: 'Свежие ягоды' }).locator('input[type="checkbox"]');
+    await expect(berriesCheckbox).not.toBeChecked();
 
-        // Проверяем, что страница не белая (есть контент)
-        await expect(page.locator('body')).not.toBeEmpty();
+    // 4. Ожидаем: 5 * (60 + 8) = 340 BYN
+    // Ищем цену внутри кнопки "Подтвердить"
+    const confirmBtn = page.getByRole('button', { name: /Подтвердить/ });
+    await expect(confirmBtn).toContainText('340 BYN');
 
-        // Возвращаемся назад в каталог
-        await page.goBack();
-        await page.waitForLoadState('networkidle');
-    }
+    // 5. Подтверждаем настройку
+    await confirmBtn.click();
+    
+    // Проверяем, что вернулись в обычный режим и цена в футере обновилась
+    await expect(page.locator('footer').getByText('340 BYN')).toBeVisible();
   });
 });
