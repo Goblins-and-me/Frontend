@@ -1,5 +1,4 @@
 "use client";
-import Header from "@/components/placing-order/Header"
 import { useState } from "react";
 import Footer from "@/components/placing-order/Footer"
 
@@ -18,9 +17,7 @@ export default function PlacingOrder() {
     const [inscription, setInscription] = useState("");
   return (
     <div className="min-h-screen w-full bg-orderBg">
-        <Header />
-
-        <div className="relative top-13 px-4 mb-56">
+        <div className="relative px-4">
 
             <span className="text-xl"><strong>Оформление заказа</strong></span>
 
@@ -100,8 +97,11 @@ export default function PlacingOrder() {
                 Мы свяжемся с вами для подтверждения заказа в течение 15 минут.
             </p>
 
-            <Footer />
-
+            <div className="fixed bottom-17 w-full left-0 px-4">
+                <button className="w-full rounded-2xl bg-rose-300 py-3 text-base font-bold text-white">
+                    Отправить заказ
+                </button>
+            </div>
         </div>
     </div>
   )

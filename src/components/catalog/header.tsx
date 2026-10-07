@@ -19,14 +19,14 @@ export default function Header() {
           <span className="ml-1">Gomel, Belarus</span>
         </p>
       </div>
-      <button>
+      <Link href={"/placing_order"}>
         <Image
           src="/cart.svg"
           width="24"
           height="24"
           alt="cart"
         />
-      </button>
+      </Link>
     </div>
   );
 }

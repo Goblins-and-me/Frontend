@@ -55,7 +55,7 @@ export default function ProductPage() {
       <main className={`w-full max-w-full h-full bg-screen grid overflow-hidden transition-all duration-300 ${isConfiguring ? 'grid-rows-auto_1fr' : 'grid-rows-auto_1fr_auto'}`}>
 
         <header className="flex items-center justify-between px-6 pt-5 pb-3">
-          <Link href="/catalog" className="w-10 h-10 flex items-center justify-start text-main hover:opacity-70 transition" aria-label="Назад">
+          <Link href="/" className="w-10 h-10 flex items-center justify-start text-main hover:opacity-70 transition" aria-label="Назад">
             <ChevronLeft className="w-6 h-6" strokeWidth={2} />
           </Link>
           <h1 className="text-lg font-bold tracking-wide text-main">
