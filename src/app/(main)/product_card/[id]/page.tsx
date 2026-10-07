@@ -195,7 +195,7 @@ export default function ProductPage() {
             )}
           </div>
 
-          <div className="mt-4 pt-2">
+          <div className="mt-4 pt-2 pb-14">
             {!isConfiguring ? (
               <button
                 onClick={() => setIsConfiguring(true)}
@@ -215,7 +215,7 @@ export default function ProductPage() {
         </div>
 
         {!isConfiguring && (
-          <footer className="border-t border-neutral-100 p-5 flex items-center justify-between bg-white/40 backdrop-blur-md animate-slideUp">
+          <footer className="border-t border-neutral-100 p-5 pb-14 flex items-center justify-between bg-white/40 backdrop-blur-md animate-slideUp">
             <div className="flex flex-col">
               <span className="text-10px uppercase tracking-wider text-neutral-400 font-bold mb-0.5">Стоимость:</span>
               <span className="text-lg font-black text-main leading-none">{product.price_sea}</span>

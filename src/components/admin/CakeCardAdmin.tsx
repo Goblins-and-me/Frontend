@@ -16,7 +16,7 @@ export default function CakeCard({
   return (
     <Link
       href={`/product_card/${id}`}
-      className="relative flex flex-col rounded-3xl overflow-hidden bg-white shadow-lg aspect-[179/189]"
+      className="relative flex flex-col rounded-3xl overflow-hidden bg-white shadow-lg aspect-179/189"
     >
       <div
         className="relative h-1/2 flex items-center justify-center"

@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Footer from "@/components/placing-order/Footer"
 
 
 const Cake = {
