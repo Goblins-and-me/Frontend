@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
-import Footer from "@/components/placing-order/Footer"
+import { use, useState } from "react";
+import dynamic from 'next/dynamic'
+// import Footer from "@/components/placing-order/Footer"
 
 
 const Cake = {
@@ -11,10 +12,14 @@ const Cake = {
     price: "67 BYN"
 }
 
+const DatePicker = dynamic(() => import('@/components/calendar/Calendar'))
+
 export default function PlacingOrder() {
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [inscription, setInscription] = useState("");
+    const [showCalendar, setShowCalendar] = useState(false)
+
   return (
     <div className="min-h-screen w-full bg-orderBg">
         <div className="relative px-4">
@@ -96,6 +101,12 @@ export default function PlacingOrder() {
             <p className="mt-14 text-xs text-center text-black/60">
                 Мы свяжемся с вами для подтверждения заказа в течение 15 минут.
             </p>
+                <div className="flex w-full justify-center mt-2">
+                    <button onClick={()=>{ setShowCalendar(true)}} className="w-1/2 rounded-2xl bg-rose-300 py-3 text-base font-bold text-white">
+                        Выбор даты
+                    </button>
+                </div>
+            {showCalendar && <DatePicker onClose={() => setShowCalendar(false)} />}
 
             <div className="fixed bottom-17 w-full left-0 px-4">
                 <button className="w-full rounded-2xl bg-rose-300 py-3 text-base font-bold text-white">
