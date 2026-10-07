@@ -23,6 +23,8 @@
 
     /* Шрифты Next.js (связываем с нашей переменной --font-futura) */
     --font-inter: var(--font-inter), sans-serif;
-
-
+    
+    
 }
+
+
