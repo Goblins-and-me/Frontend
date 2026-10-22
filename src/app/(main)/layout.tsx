@@ -16,7 +16,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`h-full antialiased bg-screen`}
     >
       <header className="w-full bg-transparent px-4 py-4 sm:px-6"><Header /></header>
-      <body className="min-h-full flex flex-col pb-17">{children}</body>
+      <body className="min-h-full flex flex-col pb-17">
+        <div className="container mx-auto">
+          {children}
+        </div>
+      </body>
       <footer><Footer /></footer>
     </html>
   );

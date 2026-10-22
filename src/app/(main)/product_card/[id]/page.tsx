@@ -2,17 +2,13 @@
 
 import Link from 'next/link';
 import { useState } from "react";
+import { useParams } from 'next/navigation';
 import Image from "next/image";
 import { ChevronLeft, Heart, Check } from 'lucide-react';
-
-interface Product {
-  title: string;
-  description: string;
-  price_sea: string;
-  image?: string;
-}
+import { Products } from '@/services/ProductService';
 
 export default function ProductPage() {
+  const { id } = useParams<{ id: string }>();
 
   const [weight, setWeight] = useState<number>(2.5);
   const [filling, setFilling] = useState<string>('snickers');
@@ -24,11 +20,13 @@ export default function ProductPage() {
   const [isConfiguring, setIsConfiguring] = useState<boolean>(false);
 
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const selectedProduct = Products.find((item) => String(item.id) === id);
 
   const handleDecorChange = (id: string) => {
     setDecor(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }));
   };
 
+  const [hasConfigured, setHasConfigured] = useState<boolean>(false);
   const calculatePrice = (): number => {
     let basePricePerKg = 60;
     if (filling === 'velvet') basePricePerKg += 5;
@@ -43,18 +41,32 @@ export default function ProductPage() {
     return Math.round(totalPrice);
   };
 
-  const product: Product = {
-    title: 'Название',
-    description: 'Описание',
-    price_sea: `${calculatePrice()} BYN`,
-    image: '/cake.png',
+  if (!selectedProduct) {
+    return (
+      <main className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center gap-4 px-6 text-center">
+        <h1 className="text-2xl font-bold text-main">Торт не найден</h1>
+        <p className="text-second">Возможно, товар был удален или ссылка устарела.</p>
+        <Link href="/" className="font-semibold text-accent hover:underline">
+          Вернуться в каталог
+        </Link>
+      </main>
+    );
+  }
+
+  const product = {
+    title: selectedProduct.name,
+    description: selectedProduct.description,
+    price_sea: `${isConfiguring || hasConfigured ? calculatePrice() : selectedProduct.price.toFixed(2)} BYN`,
+    image: selectedProduct.image,
   };
 
-  return (
-    <div className="h-screen w-screen bg-screen flex justify-center items-center overflow-hidden antialiased">
-      <main className={`w-full max-w-full h-full bg-screen grid overflow-hidden transition-all duration-300 ${isConfiguring ? 'grid-rows-auto_1fr' : 'grid-rows-auto_1fr_auto'}`}>
 
-        <header className="flex items-center justify-between px-6 pt-5 pb-3">
+
+  return (
+    <div className="h-screen pb-3 w-screen bg-screen flex justify-center items-center overflow-hidden antialiased">
+      <main className="flex h-full w-full max-w-full flex-col overflow-hidden bg-screen">
+
+        <div className="flex shrink-0 items-center justify-between px-6 pt-5 pb-3">
           <Link href="/" className="w-10 h-10 flex items-center justify-start text-main hover:opacity-70 transition" aria-label="Назад">
             <ChevronLeft className="w-6 h-6" strokeWidth={2} />
           </Link>
@@ -73,10 +85,10 @@ export default function ProductPage() {
               fill={isFavorite ? 'currentColor' : 'none'}
             />
           </button>
-        </header>
+        </div>
 
-        <div className="px-6 pb-4 grid grid-rows-1fr_auto min-h-0 overflow-hidden">
-          <div className="grid grid-rows-auto_1fr min-h-0 items-start content-start">
+        <div className="min-h-0 flex-1 overflow-auto px-6 pb-4">
+          <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] items-start content-start">
 
             <div className="relative w-full h-64 max-h-64 rounded-2xl mb-4 select-none overflow-hidden bg-neutral-50 flex items-center justify-center">
               {product.image && (
@@ -91,7 +103,7 @@ export default function ProductPage() {
             </div>
 
             {!isConfiguring ? (
-              <section className="overflow-y-auto max-h-full pr-1">
+              <section className="min-h-0 overflow-y-auto pr-1">
                 <h2 className="text-xl font-black mb-1.5 text-main tracking-tight">{product.title}</h2>
                 <p className="text-13 leading-1.4 text-second font-normal">
                   {product.description}
@@ -195,7 +207,7 @@ export default function ProductPage() {
             )}
           </div>
 
-          <div className="mt-4 pt-2 pb-14">
+          <div className="mt-4 pt-2">
             {!isConfiguring ? (
               <button
                 onClick={() => setIsConfiguring(true)}
@@ -205,8 +217,11 @@ export default function ProductPage() {
               </button>
             ) : (
               <button
-                onClick={() => setIsConfiguring(false)}
-                className="w-full py-4 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all duration-200 tracking-wide text-sm shadow-sm"
+                onClick={() => {
+                  setHasConfigured(true);
+                  setIsConfiguring(false);
+                }}
+                className="w-full mb-10 py-4 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all duration-200 tracking-wide text-sm shadow-sm"
               >
                 Подтвердить : {product.price_sea}
               </button>
@@ -220,9 +235,9 @@ export default function ProductPage() {
               <span className="text-10px uppercase tracking-wider text-neutral-400 font-bold mb-0.5">Стоимость:</span>
               <span className="text-lg font-black text-main leading-none">{product.price_sea}</span>
             </div>
-            <button className="px-6 py-3.5 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-98 transition-all duration-200 tracking-wide text-sm shadow-sm">
+            <Link href="/placing_order" className="px-6 py-3.5 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-98 transition-all duration-200 tracking-wide text-sm shadow-sm">
               Заказать торт
-            </button>
+            </Link>
           </footer>
         )}
       </main>

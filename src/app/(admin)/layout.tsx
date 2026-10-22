@@ -8,7 +8,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-container bg-screen flex flex-col h-screen">
+    <div className="admin-container bg-screen flex flex-col ">
       <header>
         <Header
           status={'Admin'}
@@ -19,7 +19,7 @@ export default function AdminLayout({
           <AdminSidebar />
 
           {/* Рендерим содержимое страниц админки */}
-          <main>{children}</main>
+          <main className="w-full">{children}</main>
       </div>
     </div>
   );
