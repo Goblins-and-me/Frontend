@@ -8,12 +8,15 @@ interface CakeCardProps {
   image: string;
   flavor: string;
   backgroundColor: string;
+  isAdminPanel: boolean;
 }
 
 
-export default function CakeCard({ id, name, price, image, flavor, backgroundColor }: CakeCardProps) {
+export default function CakeCard({ id, name, price, image, flavor, backgroundColor, isAdminPanel = false }: CakeCardProps) {
   return (
-    <Link href={`/product_card/${id}`} className="relative rounded-3xl overflow-hidden bg-white shadow-lg">
+    <Link
+      href={isAdminPanel ? `/admin/product_card/${id}` : `/product_card/${id}`}
+      className="relative rounded-3xl overflow-hidden bg-white shadow-lg">
       <div
         className='relative min-h-36 flex items-center justify-center'
         style={{ backgroundColor: backgroundColor }}
@@ -24,7 +27,7 @@ export default function CakeCard({ id, name, price, image, flavor, backgroundCol
         <h2 className="text-2xl font-medium font-main text-black">{name}</h2>
         <p className="text-gray-500 font-main text-lg mt-1">Flavor : {flavor}</p>
         <div className="flex items-end justify-between mt-4">
-          <span className="text-3xl font-second font-bold text-orange-500">${price}</span>
+          <span className="text-3xl font-second font-bold text-orange-500">{price} BYN</span>
         </div>
       </div>
     </Link>
