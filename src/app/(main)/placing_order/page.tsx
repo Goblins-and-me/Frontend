@@ -10,19 +10,18 @@ export default function PlacingOrder() {
     const [inscription, setInscription] = useState("");
     const [showCalendar, setShowCalendar] = useState(false);
 
-    // 1. Переносим Cake в состояние
     const [cake, setCake] = useState({
         filling: "Сникерс",
         weight: "2.0 кг",
         decor: "Свежие ягоды",
-        date: "16 октября 2026", // Дефолтная дата
+        date: "Выерете дату",
         price: "67 BYN"
     });
 
-    // 2. Функция для обновления даты
+    // Функция для обновления даты
     const handleDateChange = (newDate: string) => {
         setCake(prev => ({ ...prev, date: newDate }));
-        setShowCalendar(false); // Опционально: закрываем календарь после выбора
+        setShowCalendar(false);
     };
 
   return (
@@ -116,7 +115,7 @@ export default function PlacingOrder() {
             {showCalendar && (
                 <DatePicker 
                     onClose={() => setShowCalendar(false)} 
-                    onSelectDate={handleDateChange} // 4. Передаем функцию в календарь
+                    onSelectDate={handleDateChange}
                 />
             )}
 
