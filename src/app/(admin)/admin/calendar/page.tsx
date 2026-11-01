@@ -1,7 +1,9 @@
-export default function Calendar() {
+import Calendar from "@/components/calendar/Calendar"
+
+export default function AdminCalendar() {
     return (
-        <p>
-            calendar works
-        </p>
+      <div>
+        <Calendar />
+      </div>
     )
 }

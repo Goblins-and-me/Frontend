@@ -1,10 +1,7 @@
 "use client";
 import { useState } from "react";
-=======
-import { use, useState } from "react";
 import dynamic from 'next/dynamic'
 // import Footer from "@/components/placing-order/Footer"
->>>>>>> origin/hanenev
 
 
 const Cake = {
