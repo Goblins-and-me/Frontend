@@ -8,7 +8,7 @@ export default function Home() {
   const cards = Products
 
   return (
-    <div className="h-screen relative">
+    <div className="min-h-dvh relative">
 
       <div className="relative mx-auto w-full max-w-5xl pt-60 pb-6 px-6">
         <Image
@@ -31,7 +31,7 @@ export default function Home() {
 
         </div>
       </div>
-      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10 px-6 pb-17'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10 px-6 pb-17 max-w-5xl mx-auto'>
         {
           cards.map((element, index) =>(
             <CakeCard

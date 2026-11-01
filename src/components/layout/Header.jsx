@@ -16,7 +16,7 @@ function getCoordinates() {
 
 export default function Header() {
   // Начальное состояние — дефолтный город (например, Гомель)
-  const [city, setCity] = useState('Гомель');
+  const [city] = useState('Гомель');
 
   useEffect(() => {
     async function updateLocation() {

@@ -8,7 +8,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-container bg-screen flex flex-col ">
+    <div className="admin-container min-h-dvh bg-screen flex flex-col">
       <header>
         <Header
           status={'Admin'}
