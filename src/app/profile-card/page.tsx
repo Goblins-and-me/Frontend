@@ -9,6 +9,17 @@ export default function ProfilePage() {
 
   const [rating, setRating] = useState<number>(5);
 
+  const userCreds ={
+    date: '12 Мая 2026',
+    date_of_birth: '24 Октября 1998',
+    orders: 15,
+    cake: '/cake.png',
+    cake_name:'не знаю, допустим наполеон',
+    user:'/cake.png',
+    user_name:'Света'
+  };
+
+
   return (
     <div className="h-screen w-screen bg-screen flex justify-center items-center overflow-hidden antialiased">
       <main className="w-full max-w-full h-full bg-screen grid grid-rows-auto_1fr_auto overflow-hidden">
@@ -29,15 +40,15 @@ export default function ProfilePage() {
           <div className="flex items-center px-2 py-2">
             <div className="relative w-16 h-16 rounded-full overflow-hidden mr-4 shadow-sm bg-neutral-100 flex-shrink-0">
               <Image 
-                src="/cake.png" 
-                alt="Цветана" 
+                src={userCreds.user} 
+                alt="user" 
                 fill
                 className="object-cover"
                 priority
               />
             </div>
             <div className="flex flex-col">
-              <h2 className="text-lg font-black text-main tracking-tight leading-tight mb-0.5">Цветана</h2>
+              <h2 className="text-lg font-black text-main tracking-tight leading-tight mb-0.5">{userCreds.user_name}</h2>
               <p className="text-xs text-second font-medium">Любимый клиент Sweet Story</p>
             </div>
           </div>
@@ -45,28 +56,28 @@ export default function ProfilePage() {
           <div className="bg-white rounded-2xl p-5 border border-neutral-100 shadow-sm space-y-3.5">
             <div className="flex justify-between items-center text-xs">
               <span className="text-second font-medium">Регистрация:</span>
-              <span className="font-bold text-main">12 Мая 2026</span>
+              <span className="font-bold text-main">{userCreds.date}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-second font-medium">День рождения:</span>
-              <span className="font-bold text-main">24 Октября</span>
+              <span className="font-bold text-main">{userCreds.date_of_birth}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-second font-medium">Всего заказов:</span>
-              <span className="font-black text-accent">15 заказов</span>
+              <span className="font-black text-accent">{userCreds.orders}</span>
             </div>
             <div className="flex justify-between items-center text-xs">
               <span className="text-second font-medium">Любимый торт:</span>
               <div className="flex items-center gap-2 font-bold text-main">
                 <div className="relative w-5 h-5 rounded-md overflow-hidden bg-neutral-50 flex-shrink-0">
                   <Image 
-                    src="/cake.png" 
+                    src={userCreds.cake} 
                     alt="Торт" 
                     fill
                     className="object-cover"
                   />
                 </div>
-                <span>Праздничный</span>
+                <span>{userCreds.cake_name}</span>
               </div>
             </div>
           </div>
