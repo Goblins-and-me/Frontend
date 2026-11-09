@@ -22,9 +22,9 @@ export default function ProfilePage() {
 
   return (
     <div className="h-screen w-screen bg-screen flex justify-center items-center overflow-hidden antialiased">
-      <main className="w-full max-w-full h-full bg-screen grid grid-rows-auto_1fr_auto overflow-hidden">
+      <div className=" max-w-60% h-full bg-screen grid grid-rows-auto_1fr_auto overflow-hidden">
         
-        <header className="flex items-center justify-between px-6 pt-5 pb-3 bg-transparent">
+        <div className="flex items-center justify-between px-6 pt-5 pb-3 bg-transparent">
           <Link href="/catalog" className="w-10 h-10 flex items-center justify-start text-main hover:opacity-70 transition" aria-label="Назад">
             <ChevronLeft className="w-6 h-6" strokeWidth={2} />
           </Link>
@@ -32,7 +32,7 @@ export default function ProfilePage() {
           <button className="w-10 h-10 flex items-center justify-end text-main hover:opacity-70 transition" aria-label="Настройки">
             <Settings className="w-5 h-5" strokeWidth={2.2} />
           </button>
-        </header>
+        </div>
 
 
         <div className="px-4 pb-4 overflow-y-auto space-y-4 select-none scrollbar-thin">
@@ -102,19 +102,19 @@ export default function ProfilePage() {
 
         </div>
 
-        <footer className="border-t border-neutral-100 p-4 bg-white flex flex-col gap-2.5 animate-slideUp">
-          <button className="w-full py-3.5 bg-rose-50 text-accent font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
+        <div className="border-t border-neutral-100 p-4 bg-white flex flex-col gap-2.5 animate-slideUp">
+          <button className="w-full py-3.5 bg-screen text-accent font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
             + Добавить аккаунт
           </button>
-          <button className="w-full py-3.5 bg-neutral-50 text-main border border-neutral-100 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
+          <button className="w-full py-3.5 bg-screen bg-neutral-50 text-main border border-neutral-100 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
             Сменить аккаунт
           </button>
-          <button className="w-full py-3.5 bg-rose-50 text-red-500 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
+          <button className="w-full py-3.5 bg-screen text-red-500 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
             Удалить аккаунт
           </button>
-        </footer>
+        </div>
 
-      </main>
+      </div>
     </div>
   );
 }
