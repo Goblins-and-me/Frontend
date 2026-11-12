@@ -63,8 +63,8 @@ export default function ProductPage() {
 
 
   return (
-    <div className="h-screen pb-3 w-screen bg-screen flex justify-center items-center overflow-hidden antialiased">
-      <main className="flex h-full w-full max-w-full flex-col overflow-hidden bg-screen">
+    <div className="product-card-cont bg-screen antialiased">
+      <main className="flex w-full flex-col bg-screen">
 
         <div className="flex shrink-0 items-center justify-between px-6 pt-5 pb-3">
           <Link href="/" className="w-10 h-10 flex items-center justify-start text-main hover:opacity-70 transition" aria-label="Назад">
@@ -87,8 +87,8 @@ export default function ProductPage() {
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-auto px-6 pb-4">
-          <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] items-start content-start">
+        <div className="px-6 pb-6">
+          <div>
 
             <div className="relative w-full h-64 max-h-64 rounded-2xl mb-4 select-none overflow-hidden bg-neutral-50 flex items-center justify-center">
               {product.image && (
@@ -110,12 +110,12 @@ export default function ProductPage() {
                 </p>
               </section>
             ) : (
-              <div className="flex flex-col min-h-0 h-full text-left pt-2 animate-fadeIn">
+              <div className="flex flex-col text-left pt-2 animate-fadeIn">
                 <h3 className="text-xs text-second font-bold mb-3 uppercase tracking-wider text-center">
                   Настройка торта
                 </h3>
 
-                <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-4 select-none scrollbar-thin">
+                <div className="pr-1 space-y-4 select-none scrollbar-thin">
                   <div className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm">
                     <div className="flex justify-between items-center mb-1">
                       <h4 className="font-bold text-main text-sm">Вес торта</h4>
@@ -221,7 +221,7 @@ export default function ProductPage() {
                   setHasConfigured(true);
                   setIsConfiguring(false);
                 }}
-                className="w-full mb-10 py-4 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all duration-200 tracking-wide text-sm shadow-sm"
+                className="w-full py-4 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all duration-200 tracking-wide text-sm shadow-sm"
               >
                 Подтвердить : {product.price_sea}
               </button>
@@ -230,7 +230,7 @@ export default function ProductPage() {
         </div>
 
         {!isConfiguring && (
-          <footer className="border-t border-neutral-100 p-5 pb-14 flex items-center justify-between bg-white/40 backdrop-blur-md animate-slideUp">
+          <footer className="border-t border-neutral-100 p-5 flex items-center justify-between backdrop-blur-md animate-slideUp">
             <div className="flex flex-col">
               <span className="text-10px uppercase tracking-wider text-neutral-400 font-bold mb-0.5">Стоимость:</span>
               <span className="text-lg font-black text-main leading-none">{product.price_sea}</span>

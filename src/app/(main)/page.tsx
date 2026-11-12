@@ -31,7 +31,7 @@ export default function Home() {
 
         </div>
       </div>
-      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10 px-6 pb-17 max-w-5xl mx-auto'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10 px-6 pb-17 cont'>
         {
           cards.map((element, index) =>(
             <CakeCard

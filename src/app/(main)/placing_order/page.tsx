@@ -21,7 +21,7 @@ export default function PlacingOrder() {
     const [showCalendar, setShowCalendar] = useState(false)
 
   return (
-    <div className="min-h-screen w-full bg-orderBg">
+    <div className="min-h-screen w-full bg-orderBg cont">
         <div className="relative px-4">
 
             <span className="text-xl"><strong>Оформление заказа</strong></span>
@@ -108,8 +108,8 @@ export default function PlacingOrder() {
                 </div>
             {showCalendar && <DatePicker onClose={() => setShowCalendar(false)} />}
 
-            <div className="fixed bottom-17 w-full left-0 px-4">
-                <button className="w-full rounded-2xl bg-rose-300 py-3 text-base font-bold text-white">
+            <div className="fixed bottom-17 w-full left-0 px-4 flex justify-center">
+                <button className="w-full rounded-2xl bg-rose-300 py-3 text-base font-bold text-white cont">
                     Отправить заказ
                 </button>
             </div>

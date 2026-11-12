@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
 @theme {
+
+    /* Контейнер */
+    --container-center: true;
+    
+
+
     /* Цвета */
     --color-catalog: #f0f0f0;
     --color-main: #2B1E19;
@@ -29,6 +35,16 @@
     --font-inter: var(--font-inter), sans-serif;
     
     
+}
+
+@layer components {
+    .cont {
+        @apply max-w-5xl mx-auto;
+    }
+    
+    .product-card-cont {
+        @apply max-w-xl mx-auto w-full;
+    }
 }
 
 
