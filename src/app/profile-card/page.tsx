@@ -102,14 +102,14 @@ export default function ProfilePage() {
 
         </div>
 
-        <div className="border-t border-neutral-100 p-4 bg-white flex flex-col gap-2.5 animate-slideUp">
-          <button className="w-full py-3.5 bg-screen text-accent font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
+        <div className="border-t border-neutral-100 p-4 bg-none flex flex-col gap-1.5 animate-slideUp">
+          <button className="cursor-pointer w-full py-3.5 bg-accent text-gray-100 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
             + Добавить аккаунт
           </button>
-          <button className="w-full py-3.5 bg-screen bg-neutral-50 text-main border border-neutral-100 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
+          <button className="cursor-pointer w-full py-1.5 bg-none text-main border border-neutral-100 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
             Сменить аккаунт
           </button>
-          <button className="w-full py-3.5 bg-screen text-red-500 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
+          <button className="cursor-pointer 3w-full py-1.5 bg-screen text-red-500 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
             Удалить аккаунт
           </button>
         </div>
