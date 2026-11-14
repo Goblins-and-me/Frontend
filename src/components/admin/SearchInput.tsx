@@ -1,6 +1,10 @@
 import { Search } from 'lucide-react'; // Установите через npm i lucide-react или замените на SVG
 
-export default function SearchInput() {
+interface SearchInputProps {
+  placeholder: string;
+}
+
+export default function SearchInput({ placeholder = "Поиск по панели... " }: SearchInputProps) {
   return (
     <div className="w-full max-w-xl  bg-[#FAF6F0]"> {/* Фоновый цвет взят примерно как на картинке */}
       <div className="relative flex items-center">
@@ -10,7 +14,7 @@ export default function SearchInput() {
         {/* Поле ввода */}
         <input
           type="text"
-          placeholder="Поиск по панели..."
+          placeholder={placeholder}
           className="w-full h-9 pl-10 pr-4 rounded-2xl box-border border border-[#D5C9BE] bg-white text-lg text-[#332A24] placeholder-[#B5A89E] focus:outline-none focus:border-[#7A6A60] transition-colors"
         />
       </div>

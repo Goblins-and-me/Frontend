@@ -11,7 +11,9 @@ export default function Admin() {
 
   return (
     <div className="p-4">
-      <SearchInput />
+      <SearchInput
+        placeholder="Поиск по панели... "
+      />
       <h2 className="text-main mt-4 font-inter font-extrabold text-base">
         Сводка за сегодня
       </h2>

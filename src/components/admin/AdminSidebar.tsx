@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Gauge, Calendar, Image as GalleryIcon, ShoppingBag, Users } from "lucide-react";
 
-export default function Sidebar() {
+export default function AdminSidebar() {
   const pathname = usePathname();
 
   // Массив пунктов меню для удобного рендеринга

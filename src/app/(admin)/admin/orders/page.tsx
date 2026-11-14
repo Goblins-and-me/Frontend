@@ -1,7 +1,7 @@
 export default function Orders() {
     return (
-        <p>
-            orders works
-        </p>
+      <div>
+        orders works
+      </div>
     )
 }
