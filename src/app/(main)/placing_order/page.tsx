@@ -1,19 +1,28 @@
 "use client";
 import { useState } from "react";
-
-
-const Cake = {
-    filling: "Сникерс",
-    weight: "2.0 кг",
-    decor: "Свежие ягоды",
-    date: "16 октября 2026",
-    price: "67 BYN"
-}
+import dynamic from 'next/dynamic';
+const DatePicker = dynamic(() => import('@/components/calendar/Calendar'))
 
 export default function PlacingOrder() {
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [inscription, setInscription] = useState("");
+    const [showCalendar, setShowCalendar] = useState(false);
+
+    const [cake, setCake] = useState({
+        filling: "Сникерс",
+        weight: "2.0 кг",
+        decor: "Свежие ягоды",
+        date: "Выерете дату",
+        price: "67 BYN"
+    });
+
+    // Функция для обновления даты
+    const handleDateChange = (newDate: string) => {
+        setCake(prev => ({ ...prev, date: newDate }));
+        setShowCalendar(false);
+    };
+
   return (
     <div className="min-h-screen w-full bg-orderBg">
         <div className="relative px-4">
@@ -66,35 +75,48 @@ export default function PlacingOrder() {
                 <span><b>Ваш торт</b></span><br></br>
                 <div className="flex justify-between text-xs">
                     <span className="text-black/60">Начинка:</span>
-                    <span><b>{Cake.filling}</b></span>
+                    <span><b>{cake.filling}</b></span>
                 </div>
 
                 <div className="flex justify-between text-xs">
                     <span className="text-black/60">Вес:</span>
-                    <span><b>{Cake.weight}</b></span>
+                    <span><b>{cake.weight}</b></span>
                 </div>
 
                 <div className="flex justify-between text-xs">
                     <span className="text-black/60">Декор:</span>
-                    <span><b>{Cake.decor}</b></span>
+                    <span><b>{cake.decor}</b></span>
                 </div>
 
                 <div className="flex justify-between text-xs">
                     <span className="text-black/60">Дата самовывоза:</span>
-                    <span className="text-red-400"><b>{Cake.date}</b></span>
+                    {/* 3. Используем cake.date, который теперь меняется */}
+                    <span className="text-red-400"><b>{cake.date}</b></span>
                 </div>
 
                 <div className="h-px w-full bg-orange-200 relative top-1" />
 
                 <div className="flex justify-between relative top-3">
                     <span><b>Итого к оплате:</b></span>
-                    <span className="text-base"><b>{Cake.price}</b></span>
+                    <span className="text-base"><b>{cake.price}</b></span>
                 </div>
             </div>
 
             <p className="mt-14 text-xs text-center text-black/60">
                 Мы свяжемся с вами для подтверждения заказа в течение 15 минут.
             </p>
+                <div className="flex w-full justify-center mt-2">
+                    <button onClick={()=>{ setShowCalendar(true)}} className="w-1/2 rounded-2xl bg-rose-300 py-3 text-base font-bold text-white">
+                        Выбор даты
+                    </button>
+                </div>
+                
+            {showCalendar && (
+                <DatePicker 
+                    onClose={() => setShowCalendar(false)} 
+                    onSelectDate={handleDateChange}
+                />
+            )}
 
             <div className="fixed bottom-17 w-full left-0 px-4">
                 <button className="w-full rounded-2xl bg-rose-300 py-3 text-base font-bold text-white">
