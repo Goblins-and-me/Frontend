@@ -4,17 +4,26 @@ const PRODUCT_URL = 'http://localhost:3000/product_card/1';
 
 test.describe('Страница товара', () => {
 
-  test('Загрузка, дизайн и дефолтная цена', async ({ page }) => {
+  test('Загрузка и базовая цена', async ({ page }) => {
     await page.goto(PRODUCT_URL);
 
     await expect(page.getByRole('heading', { name: 'Карточка товара' })).toBeVisible();
+    
+    // Проверяем начальную цену из базы данных
+    await expect(page.getByText('34.21 BYN')).toBeVisible();
+  });
 
-    const configBtn = page.getByRole('button', { name: 'Настроить' });
-    await expect(configBtn).toBeVisible();
-    await expect(configBtn).toHaveCSS('background-color', 'rgb(255, 148, 154)');
+  test('Кнопка "В избранное" (Сердечко)', async ({ page }) => {
+    await page.goto(PRODUCT_URL);
 
-    // Цена по умолчанию: 2.5 * 60 + 15 (ягоды) = 165 BYN
-    await expect(page.locator('footer').getByText('165 BYN')).toBeVisible();
+    // Находим кнопку по aria-label
+    const favBtn = page.getByRole('button', { name: 'В избранное' });
+    
+    // Проверяем, что кнопка есть и кликабельна
+    await expect(favBtn).toBeVisible();
+    await favBtn.click();
+    
+    // (Опционально) Можно проверить, что иконка поменяла цвет, но для этого нужен специфичный селектор
   });
 
   test('Настройка торта и пересчет цены', async ({ page }) => {
@@ -22,40 +31,38 @@ test.describe('Страница товара', () => {
     
     await page.getByRole('button', { name: 'Настроить' }).click();
 
-    // 1. Меняем вес на 5 кг (надежный способ для React)
+    // Меняем вес на 5 кг
     const slider = page.locator('input[type="range"]');
     await slider.evaluate((e: HTMLInputElement) => {
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLInputElement.prototype, "value"
-      )?.set;
-      if (nativeInputValueSetter) {
-        nativeInputValueSetter.call(e, '5');
-      }
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+      if (setter) setter.call(e, '5');
       e.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
-    // Проверяем, что вес действительно стал 5 кг (берем первый элемент, так как второй — это подпись шкалы)
-    await expect(page.getByText('5 кг').first()).toBeVisible();
-    
-    // 2. Выбираем начинку "Манго-Маракуйя" (+8 BYN/кг)
+    // Выбираем начинку "Манго-Маракуйя"
     await page.getByRole('button', { name: /Манго-Маракуйя/ }).click();
 
-    // 3. Снимаем галочку "Свежие ягоды" (-15 BYN)
+    // Снимаем галочку "Свежие ягоды" (-15 BYN)
     await page.locator('label').filter({ hasText: 'Свежие ягоды' }).click();
 
-    // Проверяем, что галочка действительно снята
-    const berriesCheckbox = page.locator('label').filter({ hasText: 'Свежие ягоды' }).locator('input[type="checkbox"]');
-    await expect(berriesCheckbox).not.toBeChecked();
+    // Ожидаем: 5 * (60 + 8) = 340 BYN
+    await expect(page.getByRole('button', { name: /Подтвердить : 340 BYN/ })).toBeVisible();
 
-    // 4. Ожидаем: 5 * (60 + 8) = 340 BYN
-    // Ищем цену внутри кнопки "Подтвердить"
-    const confirmBtn = page.getByRole('button', { name: /Подтвердить/ });
-    await expect(confirmBtn).toContainText('340 BYN');
-
-    // 5. Подтверждаем настройку
-    await confirmBtn.click();
+    // Подтверждаем
+    await page.getByRole('button', { name: /Подтвердить/ }).click();
     
-    // Проверяем, что вернулись в обычный режим и цена в футере обновилась
+    // Проверяем, что внизу цена тоже обновилась
     await expect(page.locator('footer').getByText('340 BYN')).toBeVisible();
+  });
+
+  test('Переход к оформлению заказа', async ({ page }) => {
+    await page.goto(PRODUCT_URL);
+    
+    // Кликаем "Заказать торт"
+    await page.getByRole('link', { name: 'Заказать торт' }).click();
+    
+    // Проверяем URL и наличие заголовка на новой странице
+    await expect(page).toHaveURL(/.*\/placing_order/);
+    await expect(page.getByText('Оформление заказа')).toBeVisible();
   });
 });

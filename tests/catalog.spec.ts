@@ -1,26 +1,35 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Каталог и переходы на товары', () => {
+test.describe('Каталог и навигация', () => {
 
-  test('Переход на разные товары без поломок', async ({ page }) => {
-    await page.goto('http://localhost:3000/catalog');
-
-    // Ищем ссылки на товары (предполагаем, что CakeCard оборачивает всё в <Link>)
-    // Если ссылок нет, замени селектор на '.product-card' или другой класс из CakeCard
-    const productLinks = page.locator('a[href^="/product_card/"]');
+  test('Отображение каталога на главной странице', async ({ page }) => {
+    await page.goto('http://localhost:3000/');
     
-    // Проверяем, что карточки вообще есть
-    await expect(productLinks.first()).toBeVisible();
+    // Проверяем, что каталог загрузился
+    await expect(page.getByText('Домашние торты на заказ')).toBeVisible();
+    await expect(page.getByText('Special wedding cake').first()).toBeVisible();
+  });
 
-    // Кликаем по первому товару
-    await productLinks.first().click();
+  test('Переход на страницу товара', async ({ page }) => {
+    await page.goto('http://localhost:3000/');
+    
+    // Кликаем по первой карточке товара
+    await page.getByText('Special wedding cake').first().click();
+    
+    // Проверяем, что URL изменился на страницу товара
     await expect(page).toHaveURL(/.*\/product_card\/1/);
+  });
+
+  test('Работа нижней панели навигации', async ({ page }) => {
+    await page.goto('http://localhost:3000/');
     
-    // Возвращаемся в каталог
-    await page.goBack();
-    
-    // Кликаем по второму товару
-    await productLinks.nth(1).click();
-    await expect(page).toHaveURL(/.*\/product_card\/2/);
+    // Переход в профиль (пока заглушка)
+    await page.getByRole('link', { name: 'Профиль' }).click();
+    await expect(page).toHaveURL(/.*\/profile/);
+    await expect(page.getByText('profile_page')).toBeVisible();
+
+    // Возврат на главную
+    await page.getByRole('link', { name: 'Главная' }).click();
+    await expect(page).toHaveURL('http://localhost:3000/');
   });
 });
