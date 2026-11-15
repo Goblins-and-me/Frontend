@@ -11,7 +11,7 @@ export default function Footer() {
   const navItems = [
     { label: 'Главная', href: '/', icon: Home },
     { label: 'Профиль', href: '/profile', icon: User },
-    { label: 'Заказать', href: '/placing_order', icon: ShoppingBag },
+    { label: 'Мои заказы', href: '/order', icon: ShoppingBag },
   ];
 
   return (
@@ -19,9 +19,7 @@ export default function Footer() {
       <div className="mx-auto flex max-w-md items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
-          // В оригинале активный пункт розовый. Здесь проверяется активный роут.
-          // Если вы хотите сделать розовым именно "Заказать" по умолчанию, замените на item.label === 'Заказать'
-          const isActive = pathname === item.href; 
+          const isActive = pathname === item.href;
 
           return (
             <Link
