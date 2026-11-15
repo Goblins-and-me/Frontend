@@ -1,8 +1,14 @@
 "use client";
 import { useState } from "react";
-import dynamic from 'next/dynamic';
 
-const DatePicker = dynamic(() => import('@/components/calendar/Calendar'))
+
+const Cake = {
+    filling: "Сникерс",
+    weight: "2.0 кг",
+    decor: "Свежие ягоды",
+    date: "16 октября 2026",
+    price: "67 BYN"
+}
 
 export default function PlacingOrder() {
     const [name, setName] = useState("");

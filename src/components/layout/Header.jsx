@@ -28,7 +28,7 @@ export default function Header() {
         // чтобы превратить координаты [latitude, longitude] в название города.
         // const cityName = await fetchCityName(latitude, longitude);
         // setCity(cityName);
-        
+
         console.log('Координаты получены:', latitude, longitude);
       } catch (error) {
         console.log('Пользователь отклонил запрос или геолокация недоступна:', error.message);
@@ -40,7 +40,7 @@ export default function Header() {
   }, []); // Пустой массив означает, что запрос отработает ОДИН раз при загрузке страницы
 
   return (
-    <div className="mx-auto flex max-w-md items-center justify-between">
+    <div className="mx-auto flex items-center justify-between">
       {/* Левая часть: Круглый индикатор и Название */}
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 rounded-full bg-accent" />
