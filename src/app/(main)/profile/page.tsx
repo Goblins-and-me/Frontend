@@ -1,120 +1,151 @@
-'use client';
+import { auth, signOut } from "@/auth";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { CakeSlice, LogOut, Mail, ShoppingBag, Trash2, UserRound } from "lucide-react";
 
-import Link from 'next/link';
-import { useState } from "react";
-import Image from "next/image";
-import { ChevronLeft, Settings, Star } from 'lucide-react';
+export default async function ProfilePage() {
+  const session = await auth();
 
-export default function ProfilePage() {
+  if (!session?.user) {
+    redirect("/login");
+  }
 
-  const [rating, setRating] = useState<number>(5);
+  const displayName = session.user.name?.trim() || "Пользователь";
+  const email = session.user.email || "Email не указан";
+  const avatarInitial = (session.user.name?.trim() || session.user.email || "П")
+    .charAt(0)
+    .toLocaleUpperCase("ru-RU");
 
-  const userCreds ={
-    date: '12 Мая 2026',
-    date_of_birth: '24 Октября 1998',
-    orders: 15,
-    cake: '/cake.png',
-    cake_name:'не знаю, допустим наполеон',
-    user:'/cake.png',
-    user_name:'Света'
-  };
-
+  async function logout() {
+    "use server";
+    await signOut({ redirectTo: "/login" });
+  }
 
   return (
-    <div className="h-screen w-screen bg-screen flex justify-center items-center overflow-hidden antialiased">
-      <div className=" max-w-60% h-full bg-screen grid grid-rows-auto_1fr_auto overflow-hidden">
-        
-        <div className="flex items-center justify-between px-6 pt-5 pb-3 bg-transparent">
-          <Link href="/catalog" className="w-10 h-10 flex items-center justify-start text-main hover:opacity-70 transition" aria-label="Назад">
-            <ChevronLeft className="w-6 h-6" strokeWidth={2} />
-          </Link>
-          <h1 className="text-lg font-bold tracking-wide text-main">Профиль</h1>
-          <button className="w-10 h-10 flex items-center justify-end text-main hover:opacity-70 transition" aria-label="Настройки">
-            <Settings className="w-5 h-5" strokeWidth={2.2} />
-          </button>
-        </div>
+    <main className="min-h-[calc(100vh-74px)] bg-screen px-5 py-8 text-main sm:px-8 sm:py-12">
+      <div className="mx-auto w-full max-w-3xl">
+        <header className="mb-7 sm:mb-9">
+          <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.12em] text-accent">
+            Sweet Story
+          </p>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Мой профиль
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-second">
+            Здесь собрана информация о вашем аккаунте.
+          </p>
+        </header>
 
-
-        <div className="px-4 pb-4 overflow-y-auto space-y-4 select-none scrollbar-thin">
-
-          <div className="flex items-center px-2 py-2">
-            <div className="relative w-16 h-16 rounded-full overflow-hidden mr-4 shadow-sm bg-neutral-100 flex-shrink-0">
-              <Image 
-                src={userCreds.user} 
-                alt="user" 
-                fill
-                className="object-cover"
-                priority
-              />
+        <section
+          aria-labelledby="profile-account-heading"
+          className="overflow-hidden rounded-3xl border border-border bg-white shadow-sm"
+        >
+          <div className="flex items-center gap-4 border-b border-border bg-white px-5 py-6 sm:px-7 sm:py-7">
+            <div
+              aria-hidden="true"
+              className="grid size-16 shrink-0 place-items-center rounded-full bg-card text-2xl font-extrabold text-accent sm:size-20"
+            >
+              {avatarInitial}
             </div>
-            <div className="flex flex-col">
-              <h2 className="text-lg font-black text-main tracking-tight leading-tight mb-0.5">{userCreds.user_name}</h2>
-              <p className="text-xs text-second font-medium">Любимый клиент Sweet Story</p>
+            <div className="min-w-0">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-second">
+                Аккаунт Sweet Story
+              </p>
+              <h2
+                id="profile-account-heading"
+                className="truncate text-xl font-extrabold tracking-tight sm:text-2xl"
+              >
+                {displayName}
+              </h2>
+              <p className="mt-1 truncate text-sm text-second">{email}</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-neutral-100 shadow-sm space-y-3.5">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-second font-medium">Регистрация:</span>
-              <span className="font-bold text-main">{userCreds.date}</span>
+          <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-6">
+            <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-screen p-4">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-accent">
+                <UserRound aria-hidden="true" size={19} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-second">Имя</p>
+                <p className="truncate text-sm font-bold">{displayName}</p>
+              </div>
             </div>
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-second font-medium">День рождения:</span>
-              <span className="font-bold text-main">{userCreds.date_of_birth}</span>
+
+            <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-screen p-4">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-accent">
+                <Mail aria-hidden="true" size={19} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-second">Email</p>
+                <p className="truncate text-sm font-bold">{email}</p>
+              </div>
             </div>
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-second font-medium">Всего заказов:</span>
-              <span className="font-black text-accent">{userCreds.orders}</span>
-            </div>
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-second font-medium">Любимый торт:</span>
-              <div className="flex items-center gap-2 font-bold text-main">
-                <div className="relative w-5 h-5 rounded-md overflow-hidden bg-neutral-50 flex-shrink-0">
-                  <Image 
-                    src={userCreds.cake} 
-                    alt="Торт" 
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <span>{userCreds.cake_name}</span>
+
+            <Link
+              href="/order"
+              className="flex min-w-0 items-center gap-3 rounded-2xl bg-screen p-4 transition-colors hover:bg-card"
+            >
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-accent">
+                <ShoppingBag aria-hidden="true" size={19} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-medium text-second">Заказы</span>
+                <span className="block text-sm font-bold">Мои заказы</span>
+              </span>
+              <span aria-hidden="true" className="text-lg text-second">›</span>
+            </Link>
+
+            <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-screen p-4">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-accent">
+                <CakeSlice aria-hidden="true" size={19} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-second">Любимый десерт</p>
+                <p className="truncate text-sm font-bold text-second">Пока не указан</p>
               </div>
             </div>
           </div>
+        </section>
 
-          <div className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm text-center">
-            <h4 className="font-bold text-second text-xs mb-2.5">Оцените нашу работу</h4>
-            <div className="flex justify-center gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button 
-                  key={star} 
-                  onClick={() => setRating(star)}
-                  className="focus:outline-none transition-transform active:scale-110"
-                >
-                  <Star 
-                    className={`w-6 h-6 transition-colors ${star <= rating ? 'text-amber-400 fill-amber-400' : 'text-neutral-200'}`} 
-                    strokeWidth={1.5}
-                  />
-                </button>
-              ))}
+        <section
+          aria-labelledby="profile-actions-heading"
+          className="mt-5 rounded-3xl border border-border bg-white p-5 shadow-sm sm:mt-6 sm:p-6"
+        >
+          <h2 id="profile-actions-heading" className="text-base font-extrabold">
+            Управление аккаунтом
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-second">
+            Выйдите из аккаунта на этом устройстве или удалите его.
+          </p>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <form action={logout}>
+              <button
+                type="submit"
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-white transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              >
+                <LogOut aria-hidden="true" size={17} />
+                Выйти из аккаунта
+              </button>
+            </form>
+
+            <div>
+              <button
+                type="button"
+                disabled
+                className="flex min-h-12 w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-border bg-screen px-4 text-sm font-bold text-second opacity-70"
+              >
+                <Trash2 aria-hidden="true" size={17} />
+                Удалить аккаунт
+              </button>
+              <p className="mt-2 text-center text-xs text-second">
+                Удаление аккаунта пока недоступно.
+              </p>
             </div>
           </div>
-
-        </div>
-
-        <div className="border-t border-neutral-100 p-4 bg-none flex flex-col gap-1.5 animate-slideUp">
-          <button className="cursor-pointer w-full py-3.5 bg-accent text-gray-100 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
-            + Добавить аккаунт
-          </button>
-          <button className="cursor-pointer w-full py-1.5 bg-none text-main border border-neutral-100 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
-            Сменить аккаунт
-          </button>
-          <button className="cursor-pointer 3w-full py-1.5 bg-screen text-red-500 font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all text-xs tracking-wide">
-            Удалить аккаунт
-          </button>
-        </div>
-
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

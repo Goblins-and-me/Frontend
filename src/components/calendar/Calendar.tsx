@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 interface CalendarProps {
   onClose?: () => void;
+  onSelect?: (date: string) => void;
+  selectedDate?: string;
 }
 
 const weekDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
@@ -17,9 +19,18 @@ function dateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-export default function Calendar({ onClose }: CalendarProps) {
-  const [month, setMonth] = useState(new Date(2026, 9, 1));
-  const [selectedDate, setSelectedDate] = useState("2026-10-16");
+export default function Calendar({
+  onClose,
+  onSelect,
+  selectedDate: controlledSelectedDate,
+}: CalendarProps) {
+  const [month, setMonth] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
+  const [selectedDate, setSelectedDate] = useState(
+    () => controlledSelectedDate ?? dateKey(new Date()),
+  );
   const [occupancyByDate, setOccupancyByDate] = useState<Record<string, number>>({
     "2026-10-03": 1,
     "2026-10-11": 1,
@@ -28,6 +39,9 @@ export default function Calendar({ onClose }: CalendarProps) {
     "2026-10-24": 1,
   });
 
+  const today = new Date();
+  const todayKey = dateKey(today);
+  const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
   const leadingDays = (monthStart.getDay() + 6) % 7;
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
@@ -38,9 +52,31 @@ export default function Calendar({ onClose }: CalendarProps) {
   });
   const selectedOccupancy = occupancyByDate[selectedDate] ?? 0;
   const selectedAvailability = dailyCapacity - selectedOccupancy;
+  const isPreviousMonthDisabled = monthStart.getTime() <= currentMonthStart.getTime();
+
+  useEffect(() => {
+    const close = onClose;
+    if (!close) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        close?.();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
 
   function changeMonth(offset: number) {
-    setMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
+    setMonth((current) => {
+      const nextMonth = new Date(
+        current.getFullYear(),
+        current.getMonth() + offset,
+        1,
+      );
+      return nextMonth < currentMonthStart ? current : nextMonth;
+    });
   }
 
   function markSelectedDateFree() {
@@ -48,110 +84,169 @@ export default function Calendar({ onClose }: CalendarProps) {
   }
 
   return (
-    <div className={onClose ? "fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" : "w-full"}>
-      <div className="mx-auto w-full max-w-[320px]">
-      <section className="rounded-2xl border border-border bg-white p-3">
-        <div className="mb-2 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => changeMonth(-1)}
-            aria-label="Предыдущий месяц"
-            className="grid size-7 place-items-center rounded-full text-second hover:bg-screen"
-          >
-            <ChevronLeft size={18} strokeWidth={2.5} />
-          </button>
-          <h2 className="text-sm font-bold capitalize text-main">
-            {month.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}
-          </h2>
-          <button
-            type="button"
-            onClick={() => changeMonth(1)}
-            aria-label="Следующий месяц"
-            className="grid size-7 place-items-center rounded-full text-second hover:bg-screen"
-          >
-            <ChevronRight size={18} strokeWidth={2.5} />
-          </button>
-        </div>
+    <div
+      className={
+        onClose
+          ? "fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-main/45 p-4 backdrop-blur-sm"
+          : "w-full"
+      }
+      onClick={onClose}
+    >
+      <div
+        className="mx-auto w-full max-w-[360px]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <section
+          aria-labelledby="calendar-title"
+          aria-modal={onClose ? true : undefined}
+          className="rounded-3xl border border-border bg-white p-4 shadow-xl sm:p-5"
+          role={onClose ? "dialog" : undefined}
+        >
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => changeMonth(-1)}
+              aria-label="Предыдущий месяц"
+              disabled={isPreviousMonthDisabled}
+              className="grid size-9 place-items-center rounded-full text-second transition-colors hover:bg-screen disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              <ChevronLeft size={19} strokeWidth={2.5} />
+            </button>
+            <h2
+              id="calendar-title"
+              className="text-center text-base font-extrabold capitalize text-main"
+            >
+              {month.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}
+            </h2>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Закрыть календарь"
+                className="grid size-9 place-items-center rounded-full text-second transition-colors hover:bg-screen"
+              >
+                <X size={18} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => changeMonth(1)}
+              aria-label="Следующий месяц"
+              className="grid size-9 place-items-center rounded-full text-second transition-colors hover:bg-screen"
+            >
+              <ChevronRight size={19} strokeWidth={2.5} />
+            </button>
+          </div>
 
-        <div className="grid grid-cols-7">
-          {weekDays.map((day) => (
-            <span key={day} className="py-1 text-center text-[10px] font-semibold text-second">
-              {day}
-            </span>
-          ))}
-        </div>
+          <div className="mb-1 grid grid-cols-7">
+            {weekDays.map((day) => (
+              <span
+                key={day}
+                className="py-2 text-center text-xs font-semibold text-second"
+              >
+                {day}
+              </span>
+            ))}
+          </div>
 
-        <div className="grid grid-cols-7">
-          {days.map(({ date, key, isCurrentMonth }) => {
-            const isSelected = key === selectedDate;
-            const occupied = occupancyByDate[key] ?? 0;
-            return (
-              <div key={key} className="flex aspect-square flex-col items-center justify-center gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setSelectedDate(key)}
-                  aria-pressed={isSelected}
-                  aria-label={`${date.getDate()} ${date.toLocaleDateString("ru-RU", { month: "long" })}: занято ${occupied} из ${dailyCapacity}, свободно ${dailyCapacity - occupied} из ${dailyCapacity}`}
-                  className={`grid size-6 place-items-center rounded-full text-[11px] transition-colors ${
-                    isSelected
-                      ? "bg-accent font-semibold text-white"
-                      : !isCurrentMonth
-                        ? "text-separators"
-                        : occupied > 0
-                          ? "border border-accent text-accent"
-                          : "text-main hover:bg-screen"
-                  }`}
+          <div className="grid grid-cols-7">
+            {days.map(({ date, key, isCurrentMonth }) => {
+              const isSelected = key === selectedDate;
+              const isToday = key === todayKey;
+              const isPast = key < todayKey;
+              const occupied = occupancyByDate[key] ?? 0;
+              const isFullyBooked = occupied >= dailyCapacity;
+              const isDisabled = !isCurrentMonth || isPast || isFullyBooked;
+
+              return (
+                <div
+                  key={key}
+                  className="flex aspect-square flex-col items-center justify-center gap-1"
                 >
-                  {date.getDate()}
-                </button>
-                <span className={`text-[7px] leading-none ${occupied > 0 ? "text-accent" : "text-calendar-free"}`}>
-                  {occupied}/{dailyCapacity}
-                </span>
-              </div>
-            );
-          })}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDate(key)}
+                    disabled={isDisabled}
+                    aria-current={isToday ? "date" : undefined}
+                    aria-pressed={isSelected}
+                    aria-label={`${date.getDate()} ${date.toLocaleDateString("ru-RU", { month: "long" })}${isToday ? ", сегодня" : ""}: занято ${occupied} из ${dailyCapacity}, свободно ${dailyCapacity - occupied} из ${dailyCapacity}${isPast ? ", дата прошла" : ""}`}
+                    className={`grid size-8 place-items-center rounded-full text-xs transition-colors ${
+                      isSelected
+                        ? "bg-accent font-bold text-white"
+                        : isDisabled
+                          ? "cursor-not-allowed text-separators/60"
+                          : isToday
+                            ? "border border-accent font-bold text-accent hover:bg-card"
+                            : occupied > 0
+                              ? "border border-accent/50 text-accent hover:bg-card"
+                              : "text-main hover:bg-screen"
+                    }`}
+                  >
+                    {date.getDate()}
+                  </button>
+                  <span
+                    aria-hidden="true"
+                    className={`text-[9px] leading-none ${
+                      isDisabled
+                        ? "text-separators/50"
+                        : occupied > 0
+                          ? "text-accent"
+                          : "text-calendar-free"
+                    }`}
+                  >
+                    {occupied}/{dailyCapacity}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl bg-white/90 px-3 py-3 text-xs text-second shadow-sm">
+          <span className="flex items-center gap-2">
+            <span className="size-2.5 rounded-full bg-accent" />
+            Выбрано
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="size-2.5 rounded-full bg-calendar-free" />
+            Есть места
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="size-2.5 rounded-full bg-separators" />
+            Недоступно
+          </span>
         </div>
-      </section>
 
-      <div className="mt-3 flex items-center justify-between gap-2 text-[10px] text-second">
-        <span className="flex items-center gap-1">
-          <span className="size-2 rounded-full bg-accent" />
-          Выбрано
-        </span>
-        <span className="text-deleting">
-          {selectedOccupancy}/{dailyCapacity} Занято
-        </span>
-        <span className="text-calendar-free">
-          {selectedAvailability}/{dailyCapacity} Свободно
-        </span>
-      </div>
+        <div className="mt-3 rounded-2xl border border-border bg-white px-4 py-3 text-center text-xs text-second">
+          <span className="font-bold text-main">
+            {selectedAvailability}/{dailyCapacity}
+          </span>{" "}
+          свободных места на выбранную дату
+        </div>
 
-      <div className="mt-2 flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={markSelectedDateFree}
-          disabled={selectedOccupancy === 0}
-          className="min-h-9 rounded-xl bg-card px-3 text-[11px] font-semibold text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          Пометить свободной
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="min-h-9 rounded-xl bg-accent px-3 text-[11px] font-semibold text-white transition-colors hover:brightness-95"
-        >
-          Подтвердить дату
-        </button>
-        {onClose && (
+        <div className="mt-4 flex flex-col gap-2">
+          {!onClose && (
+            <button
+              type="button"
+              onClick={markSelectedDateFree}
+              disabled={selectedOccupancy === 0}
+              className="min-h-10 rounded-xl bg-card px-3 text-xs font-semibold text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              Пометить свободной
+            </button>
+          )}
           <button
             type="button"
-            onClick={onClose}
-            className="min-h-9 rounded-xl border border-border bg-white px-3 text-[11px] font-semibold text-second"
+            onClick={() => {
+              onSelect?.(selectedDate);
+              onClose?.();
+            }}
+            disabled={selectedAvailability === 0}
+            className="min-h-11 rounded-xl bg-accent px-4 text-sm font-bold text-white transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Закрыть календарь
+            Подтвердить дату
           </button>
-        )}
-      </div>
+        </div>
       </div>
     </div>
   );
