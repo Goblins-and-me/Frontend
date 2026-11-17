@@ -14,12 +14,31 @@ interface CakeOrder {
   price: string;
 }
 
+const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+function formatDisplayDate(dateStr: string): string {
+  if (!dateStr || dateStr === "---") return "---";
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const parsed = new Date(`${dateStr}T00:00:00`);
+    if (!Number.isNaN(parsed.getTime())) {
+      return dateFormatter.format(parsed);
+    }
+  }
+
+  return dateStr;
+}
+
 function OrderContent() {
   const searchParams = useSearchParams();
 
   const Cake: CakeOrder = {
     filling: searchParams.get("filling") ?? "Без начинки",
-    weight: searchParams.get("weight") ?? "Некорректный ввод",              // Функция связывающяя настройку заказа и его оформление ( читает передаваемую в страницу инфу)
+    weight: searchParams.get("weight") ?? "Некорректный ввод",
     decor: searchParams.get("decor") ?? "Без декора",
     date: searchParams.get("date") ?? "---",
     price: searchParams.get("price") ?? "Некорректный ввод",
@@ -28,6 +47,7 @@ function OrderContent() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [inscription, setInscription] = useState("");
+  const [pickupDate, setPickupDate] = useState(Cake.date);
   const [showCalendar, setShowCalendar] = useState(false);
 
   return (
@@ -108,7 +128,7 @@ function OrderContent() {
           <div className="flex justify-between text-xs">
             <span className="text-black/60">Дата самовывоза:</span>
             <span className="text-red-400">
-              <b>{Cake.date}</b>
+              <b>{formatDisplayDate(pickupDate)}</b>
             </span>
           </div>
 
@@ -138,7 +158,13 @@ function OrderContent() {
           </button>
         </div>
 
-        {showCalendar && <DatePicker onClose={() => setShowCalendar(false)} />}
+        {showCalendar && (
+          <DatePicker
+            onClose={() => setShowCalendar(false)}
+            onSelect={setPickupDate}
+            selectedDate={/^\d{4}-\d{2}-\d{2}$/.test(pickupDate) ? pickupDate : undefined}
+          />
+        )}
 
         <div className="fixed bottom-17 w-full left-0 px-4 flex justify-center">
           <button

@@ -22,7 +22,6 @@ export default function ProductPage() {
   const queryParams = new URLSearchParams(Cake as unknown as Record<string, string>).toString();
                   
 
-  const { id } = useParams<{ id: string }>();
 
   const [weight, setWeight] = useState<number>(2.5);
   const [filling, setFilling] = useState<string>('snickers');
@@ -42,7 +41,6 @@ export default function ProductPage() {
     setHasConfigured(true);
   };
 
-  const [hasConfigured, setHasConfigured] = useState<boolean>(false);
   const calculatePrice = (): number => {
     let basePricePerKg = 60;
     if (filling === 'velvet') basePricePerKg += 5;
