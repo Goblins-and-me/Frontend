@@ -10,6 +10,19 @@ import { Products } from '@/services/ProductService';
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
 
+  const Cake = {
+    filling: "Сникерс",              // объект для прередачи инфы про заказ на страницу оформления заказа (СВЯЗЫВАЕТ ДВЕ СТРАНИЦЫ)
+    weight: "2.0 кг",
+    decor: "Свежие ягоды",           // Добавить чтоб при выборе начинки расчёте цены и тд менялся объект
+    date: "-----",                   // НЕ МЕНЯТЬ УЖЕ СУЩЕСТВУЮЩИЕ КЛЮЧИ  по возможности не добовлять новые поля
+    price: "67 BYN"
+  }
+
+  // преобразование объекта в строку параметров для передачи
+  const queryParams = new URLSearchParams(Cake as unknown as Record<string, string>).toString();
+                  
+
+
   const [weight, setWeight] = useState<number>(2.5);
   const [filling, setFilling] = useState<string>('snickers');
   const [decor, setDecor] = useState({
@@ -235,7 +248,8 @@ export default function ProductPage() {
                 <span className="text-10px uppercase tracking-wider text-neutral-400 font-bold mb-0.5">Стоимость:</span>
                 <span className="text-lg font-black text-main leading-none">{product.price_sea}</span>
               </div>
-              <Link href="/placing_order" className="px-6 py-3.5 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-98 transition-all duration-200 tracking-wide text-sm shadow-sm">
+
+              <Link href={`/placing_order?${queryParams}`} className="px-6 py-3.5 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-98 transition-all duration-200 tracking-wide text-sm shadow-sm">
                 Заказать торт
               </Link>
             </footer>
