@@ -1,25 +1,65 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import { cookies } from "next/headers";
+
+// Хелпер: переносит Set-Cookie из ответа FastAPI в браузер пользователя
+async function forwardBackendCookies(res: Response) {
+  const setCookieHeaders = res.headers.getSetCookie();
+  if (!setCookieHeaders.length) return;
+
+  const cookieStore = await cookies();
+
+  for (const cookieStr of setCookieHeaders) {
+    const [nameValue, ...directives] = cookieStr.split(";").map((s) => s.trim());
+    const eqIndex = nameValue.indexOf("=");
+    if (eqIndex === -1) continue;
+
+    const name = nameValue.slice(0, eqIndex);
+    const value = nameValue.slice(eqIndex + 1);
+
+    const options: {
+      httpOnly?: boolean;
+      secure?: boolean;
+      sameSite?: "lax" | "strict" | "none";
+      maxAge?: number;
+      path?: string;
+    } = {};
+
+    for (const dir of directives) {
+      const [key, val] = dir.split("=");
+      const lowerKey = key.toLowerCase();
+
+      if (lowerKey === "httponly") options.httpOnly = true;
+      if (lowerKey === "secure") options.secure = true;
+      if (lowerKey === "max-age" && val) options.maxAge = Number(val);
+      if (lowerKey === "path" && val) options.path = val;
+      if (lowerKey === "samesite" && val) {
+        options.sameSite = val.toLowerCase() as "lax" | "strict" | "none";
+      }
+    }
+
+    cookieStore.set(name, value, options);
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
   },
   providers: [
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
-        confirmed_password: { label: "Confirm Password", type: "password" },
       },
 
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password || !credentials.confirmed_password) {
+        if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
         try {
-          // 1. Отправляем данные на ваш сторонний бэкенд
+          // 1. Запрос на FastAPI с сервера Next.js
           const res = await fetch(`${process.env.BACKEND_URL}/v1/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -29,21 +69,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }),
           });
 
-          const data = await res.json();
-
-          // 2. Если бэкенд вернул ошибку (например, 401)
-          if (!res.ok || !data) {
+          if (!res.ok) {
             return null;
           }
 
-          // 3. Возвращаем объект пользователя (он попадет в коллбэк jwt)
-          // Обязательно должно быть поле id
+          // 2. Пробрасываем access_token и refresh_token куки от FastAPI в браузер
+          await forwardBackendCookies(res);
+
+          const data = await res.json();
+          if (!data?.user) {
+            return null;
+          }
+
+          // 3. Возвращаем только профиль пользователя для сессии NextAuth
           return {
             id: data.user.id,
             email: data.user.email,
             name: data.user.name,
-            accessToken: data.accessToken,   // Токен от вашего бэкенда
-            refreshToken: data.refreshToken, // Refresh-токен (если есть)
+            is_admin: Boolean(data.user.is_admin),
           };
         } catch (error) {
           console.error("Ошибка авторизации на бэкенде:", error);
@@ -54,23 +97,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
 
   callbacks: {
-
     jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.accessToken = user.accessToken;
-        token.refreshToken = user.refreshToken;
+        token.is_admin = Boolean(user.is_admin);
       }
-
       return token;
     },
 
-    async session({ session, token }) {
+    session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        session.accessToken = token.accessToken as string;
+        session.user.is_admin = Boolean(token.is_admin);
       }
       return session;
     },
-  }
-})
+  },
+
+  events: {
+    // При выходе через NextAuth удаляем и куки FastAPI
+    async signOut() {
+      const cookieStore = await cookies();
+      cookieStore.delete("access_token");
+      cookieStore.delete({ name: "refresh_token", path: "/v1/auth/refresh" });
+    },
+  },
+});
