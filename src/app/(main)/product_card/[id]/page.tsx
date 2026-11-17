@@ -8,6 +8,7 @@ import { ChevronLeft, Heart, Check } from 'lucide-react';
 import { Products } from '@/services/ProductService';
 
 export default function ProductPage() {
+  const { id } = useParams<{ id: string }>();
 
   const Cake = {
     filling: "Сникерс",              // объект для прередачи инфы про заказ на страницу оформления заказа (СВЯЗЫВАЕТ ДВЕ СТРАНИЦЫ)
@@ -41,6 +42,7 @@ export default function ProductPage() {
     setHasConfigured(true);
   };
 
+  const [hasConfigured, setHasConfigured] = useState<boolean>(false);
   const calculatePrice = (): number => {
     let basePricePerKg = 60;
     if (filling === 'velvet') basePricePerKg += 5;

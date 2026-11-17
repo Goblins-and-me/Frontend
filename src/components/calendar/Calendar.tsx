@@ -121,18 +121,14 @@ export default function Calendar({ onClose, onSelectDate }: CalendarProps) {
             
             partiallyBooked: "[&>button]:bg-[#F59E0B] [&>button]:text-white [&>button]:hover:bg-[#D97706]",
             
-            almostFullyBooked: "[&>button]:bg-[#10B981] [&>button]:text-white [&>button]:hover:bg-[#059669]",
+            almostFullyBooked: "[&>button]:bg-accent [&>button]:text-white [&>button]:hover:bg-[#059669]",
           }}
         />
 
-        <div className="flex flex-wrap mt-4 items-center gap-4 text-[13px] font-semibold text-calendar-text">
+        <div className="flex justify-center mt-4 gap-4 text-[13px] font-semibold text-calendar-text">
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#10B981]" />
-            <span>Свободно(1/3)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#F59E0B]" />
-            <span>Свободно(2/3)</span>
+            <span className="w-3 h-3 rounded-full bg-accent" />
+            <span>Сегодня</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-[#EFECE6] border border-gray-200" />
