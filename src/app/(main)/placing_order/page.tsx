@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -13,13 +14,29 @@ import {
   PackageCheck,
 } from "lucide-react";
 import Calendar from "@/components/calendar/Calendar";
+import { consumeCakeOrderDraft, type CakeOrderDraft } from "@/services/CakeOrderDraft";
 
-const cake = {
+const defaultCake = {
+  title: "Торт «Сникерс»",
+  description: "Нежный торт со свежими ягодами.",
+  image: "/cake.png",
   filling: "Сникерс",
-  weight: "2 кг",
-  decor: "Свежие ягоды",
+  weight: 2,
+  decor: ["Свежие ягоды"],
   price: 67,
 };
+
+function toOrderCake(draft: CakeOrderDraft) {
+  return {
+    title: draft.title,
+    description: draft.description,
+    image: draft.image,
+    filling: draft.filling,
+    weight: draft.weight,
+    decor: draft.decor,
+    price: draft.price,
+  };
+}
 
 const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
   day: "numeric",
@@ -33,6 +50,22 @@ export default function PlacingOrder() {
   const [inscription, setInscription] = useState("");
   const [pickupDate, setPickupDate] = useState("");
   const [showCalendar, setShowCalendar] = useState(false);
+  const [cake, setCake] = useState(defaultCake);
+  const [draftError, setDraftError] = useState("");
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      try {
+        const draft = consumeCakeOrderDraft();
+        if (draft) setCake(toOrderCake(draft));
+      } catch (error) {
+        console.error("Не удалось загрузить конфигурацию торта.", error);
+        setDraftError("Не удалось загрузить выбранную конфигурацию торта.");
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   const formattedPickupDate = pickupDate
     ? dateFormatter.format(new Date(`${pickupDate}T00:00:00`))
@@ -208,13 +241,19 @@ export default function PlacingOrder() {
               </div>
 
               <div className="overflow-hidden rounded-2xl bg-screen">
-                <div className="flex h-32 items-center justify-center bg-[radial-gradient(ellipse_at_center,_#fffdfa_0%,_#f4e9e1_100%)]">
-                  <CakeSlice aria-hidden="true" className="text-accent" size={54} strokeWidth={1.3} />
+                <div className="relative h-40 bg-screen">
+                  <Image
+                    src={cake.image}
+                    alt={cake.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 360px"
+                    className="object-cover"
+                  />
                 </div>
                 <div className="p-4">
-                  <h3 className="font-extrabold">Торт «Сникерс»</h3>
+                  <h3 className="font-extrabold">{cake.title}</h3>
                   <p className="mt-1 text-xs leading-5 text-second">
-                    Нежный торт со свежими ягодами.
+                    {cake.description}
                   </p>
                 </div>
               </div>
@@ -226,11 +265,15 @@ export default function PlacingOrder() {
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-second">Вес</dt>
-                  <dd className="text-right font-semibold">{cake.weight}</dd>
+                  <dd className="text-right font-semibold">
+                    {cake.weight.toLocaleString("ru-RU")} кг
+                  </dd>
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-second">Декор</dt>
-                  <dd className="text-right font-semibold">{cake.decor}</dd>
+                  <dd className="text-right font-semibold">
+                    {cake.decor.length > 0 ? cake.decor.join(", ") : "Без декора"}
+                  </dd>
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-second">Самовывоз</dt>
@@ -248,6 +291,12 @@ export default function PlacingOrder() {
                   {cake.price} <span className="text-base">BYN</span>
                 </span>
               </div>
+
+              {draftError && (
+                <p className="mt-3 text-sm font-medium text-red-600" role="alert">
+                  {draftError}
+                </p>
+              )}
 
               <button
                 type="button"

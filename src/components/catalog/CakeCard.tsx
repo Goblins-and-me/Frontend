@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface CakeCardProps {
-  id: number;
+  id: number | string;
   name: string;
   price: number;
   image: string;
@@ -21,11 +21,11 @@ export default function CakeCard({ id, name, price, image, flavor, backgroundCol
         className='relative min-h-36 flex items-center justify-center'
         style={{ backgroundColor: backgroundColor }}
       >
-        <Image objectFit="contain" fill src={image} alt="Special wedding cake" />
+        <Image objectFit="contain" fill src={image} alt={name} />
       </div>
       <div className="p-5">
         <h2 className="text-2xl font-medium font-main text-black">{name}</h2>
-        <p className="text-gray-500 font-main text-lg mt-1">Flavor : {flavor}</p>
+        <p className="text-gray-500 font-main text-lg mt-1">Начинка: {flavor}</p>
         <div className="flex items-end justify-between mt-4">
           <span className="text-3xl font-second font-bold text-orange-500">{price} BYN</span>
         </div>

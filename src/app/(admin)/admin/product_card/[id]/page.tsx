@@ -1,184 +1,211 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from "react";
-import Image from "next/image";
-import { ChevronLeft, Heart } from 'lucide-react';
-
-interface Product {
-  title: string;
-  description: string;
-  price_sea: string;
-  image?: string;
-}
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, type FormEvent } from "react";
+import { ArrowLeft, Plus, Save } from "lucide-react";
+import {
+  cakeImageOptions,
+  getAdminCake,
+  saveAdminCake,
+  type AdminCakeValues,
+} from "@/services/AdminCakeService";
 
 export default function AdminProductPage() {
-  const [weight, setWeight] = useState<number>(2.5);
-  const [filling, setFilling] = useState<string>('snickers');
-  const [decor, setDecor] = useState({
-    berries: true,
-    figures: false,
-    photo: false,
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const isNew = id === "new";
+  const [values, setValues] = useState<AdminCakeValues>({
+    name: "",
+    description: "",
+    price: 0,
+    image: cakeImageOptions[0].src,
+    backgroundColor: "#f3e4fe",
+    weight: 2,
+    fillingId: "snickers",
+    decorIds: [],
   });
-  const [isConfiguring, setIsConfiguring] = useState<boolean>(false);
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(!isNew);
+  const [isSaving, setIsSaving] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [saveError, setSaveError] = useState("");
 
-  // --- НОВЫЕ СОСТОЯНИЯ ДЛЯ РЕДАКТИРОВАНИЯ ---
-  const [title, setTitle] = useState<string>('Название');
-  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  useEffect(() => {
+    if (isNew) return;
 
-  const [description, setDescription] = useState<string>('Описание');
-  const [isEditingDesc, setIsEditingDesc] = useState<boolean>(false);
+    let isCurrent = true;
+    getAdminCake(id)
+      .then((cake) => {
+        if (!isCurrent) return;
+        if (!cake) {
+          setLoadError("Торт не найден. Возможно, он был удалён из галереи.");
+          return;
+        }
 
-  const [customPrice, setCustomPrice] = useState<string>('');
-  const [isEditingPrice, setIsEditingPrice] = useState<boolean>(false);
-  // -----------------------------------------
+        setValues({
+          name: cake.name,
+          description: cake.description,
+          price: cake.price,
+          image: cake.image,
+          backgroundColor: cake.backgroundColor,
+          weight: cake.weight,
+          fillingId: cake.fillingId,
+          decorIds: cake.decorIds,
+        });
+      })
+      .catch((error: unknown) => {
+        console.error("Не удалось загрузить данные торта.", error);
+        if (isCurrent) {
+          setLoadError("Не удалось загрузить торт. Попробуйте обновить страницу.");
+        }
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoading(false);
+      });
 
-  const handleDecorChange = (id: string) => {
-    setDecor(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }));
+    return () => {
+      isCurrent = false;
+    };
+  }, [id, isNew]);
+
+  const updateValues = <K extends keyof AdminCakeValues>(
+    key: K,
+    value: AdminCakeValues[K],
+  ) => {
+    setValues((current) => ({ ...current, [key]: value }));
   };
 
-  const calculatePrice = (): number => {
-    let basePricePerKg = 60;
-    if (filling === 'velvet') basePricePerKg += 5;
-    if (filling === 'mango') basePricePerKg += 8;
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaveError("");
+    if (!Number.isFinite(values.price) || values.price < 0) {
+      setSaveError("Укажите корректную цену товара.");
+      return;
+    }
+    setIsSaving(true);
 
-    let totalPrice = basePricePerKg * weight;
-
-    if (decor.berries) totalPrice += 15;
-    if (decor.figures) totalPrice += 20;
-    if (decor.photo) totalPrice += 10;
-
-    return Math.round(totalPrice);
+    try {
+      await saveAdminCake(isNew ? null : id, values);
+      router.push("/admin/gallery");
+      router.refresh();
+    } catch (error) {
+      console.error("Не удалось сохранить заказ торта.", error);
+      setSaveError("Не удалось сохранить заказ. Проверьте данные и повторите попытку.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  // Если админ вручную изменил цену, выводим её, иначе — авторасчет
-  const displayPrice = customPrice !== '' ? customPrice : `${calculatePrice()} BYN`;
+  if (isLoading) {
+    return (
+      <section className="admin-cake-editor">
+        <p className="admin-cake-editor-state" role="status">Загружаем торт…</p>
+      </section>
+    );
+  }
 
-  const product: Product = {
-    title: title,
-    description: description,
-    price_sea: displayPrice,
-    image: '/cake.png',
-  };
+  if (loadError) {
+    return (
+      <section className="admin-cake-editor">
+        <div className="admin-cake-editor-error">
+          <p role="alert">{loadError}</p>
+          <Link href="/admin/gallery" className="admin-cake-back-link">
+            <ArrowLeft aria-hidden="true" size={17} />
+            Вернуться в галерею
+          </Link>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <div className="bg-screen flex justify-center items-center overflow-hidden antialiased">
-      <main className={`w-full max-w-full h-full bg-screen grid overflow-hidden transition-all duration-300 ${isConfiguring ? 'grid-rows-auto_1fr' : 'grid-rows-auto_1fr_auto'}`}>
+    <div className="admin-cake-editor">
+      <div className="admin-cake-editor-content">
+        <Link href="/admin/gallery" className="admin-cake-back-link">
+          <ArrowLeft aria-hidden="true" size={17} />
+          Галерея тортов
+        </Link>
 
-        <header className="flex items-center justify-between px-6 pt-5 pb-3">
-          <Link href="/admin/gallery" className="w-10 h-10 flex items-center justify-start text-main hover:opacity-70 transition" aria-label="Назад">
-            <ChevronLeft className="w-6 h-6" strokeWidth={2} />
-          </Link>
-          <h1 className="text-lg font-bold tracking-wide text-main">
-            {isConfiguring ? 'Настройка торта' : 'Карточка товара (Режим админа)'}
-          </h1>
-
-          <button
-            onClick={() => setIsFavorite(!isFavorite)}
-            className="w-10 h-10 flex items-center justify-end text-main hover:opacity-70 transition"
-            aria-label="В избранное"
-          >
-            <Heart
-              className={`w-6 h-6 transition-colors duration-200 ${isFavorite ? 'text-red-500' : 'text-main'}`}
-              strokeWidth={1.8}
-              fill={isFavorite ? 'currentColor' : 'none'}
-            />
-          </button>
+        <header className="admin-cake-editor-heading">
+          <p className="admin-cake-editor-eyebrow">
+            {isNew ? "Новая позиция" : "Редактирование"}
+          </p>
+          <h1>{isNew ? "Добавить товар" : "Изменить товар"}</h1>
+          <p>Укажите название, описание и цену товара.</p>
         </header>
 
-        <div className="px-6 pb-4 grid grid-rows-1fr_auto min-h-0 overflow-hidden">
-          <div className="grid grid-rows-auto_1fr min-h-0 items-start content-start">
+        <form id="admin-cake-form" onSubmit={handleSubmit}>
+          <div className="admin-cake-editor-layout">
+            <div className="admin-cake-editor-fields">
+              <section className="admin-cake-editor-card" aria-labelledby="details-title">
+                <div className="admin-cake-section-heading">
+                  <span>01</span>
+                  <div>
+                    <h2 id="details-title">О товаре</h2>
+                    <p>Название, описание и цена</p>
+                  </div>
+                </div>
 
-            <div className="relative w-full h-64 max-h-64 rounded-2xl mb-4 select-none overflow-hidden bg-neutral-50 flex items-center justify-center">
-              {product.image && (
-                <Image
-                  src={product.image}
-                  alt={product.title}
-                  fill
-                  className="object-contain pointer-events-none"
-                  priority
-                />
-              )}
+                <label className="admin-cake-field">
+                  <span>Название</span>
+                  <input
+                    type="text"
+                    name="name"
+                    value={values.name}
+                    onChange={(event) => updateValues("name", event.target.value)}
+                    maxLength={100}
+                    required
+                    placeholder="Например, свадебный торт"
+                  />
+                </label>
+
+                <label className="admin-cake-field">
+                  <span>Описание</span>
+                  <textarea
+                    name="description"
+                    value={values.description}
+                    onChange={(event) => updateValues("description", event.target.value)}
+                    maxLength={500}
+                    rows={4}
+                    placeholder="Кратко опишите торт и его особенности"
+                  />
+                </label>
+                
+                <label className="admin-cake-field">
+                  <span>Цена</span>
+                  <input
+                    type="number"
+                    name="price"
+                    value={values.price}
+                    onChange={(event) => updateValues("price", Number(event.target.value))}
+                    min="0"
+                    step="0.01"
+                    required
+                    placeholder="0.00"
+                  />
+                </label>
+              </section>
             </div>
-
-            <section className="overflow-y-auto max-h-full pr-1 flex flex-col gap-2">
-              {/* РЕДАКТИРОВАНИЕ НАЗВАНИЯ */}
-              {isEditingTitle ? (
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  onBlur={() => setIsEditingTitle(false)}
-                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
-                  className="text-xl font-black mb-1.5 text-main tracking-tight border-b-2 border-accent outline-none bg-transparent w-full"
-                  autoFocus
-                />
-              ) : (
-                <h2
-                  onClick={() => setIsEditingTitle(true)}
-                  className="text-xl font-black mb-1.5 text-main tracking-tight cursor-pointer hover:bg-neutral-100 p-1 rounded transition"
-                  title="Нажмите для редактирования"
-                >
-                  {product.title}
-                </h2>
-              )}
-
-              {/* РЕДАКТИРОВАНИЕ ОПИСАНИЯ */}
-              {isEditingDesc ? (
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  onBlur={() => setIsEditingDesc(false)}
-                  className="text-13 leading-1.4 text-second font-normal border-2 border-accent outline-none bg-transparent w-full rounded-lg p-1 min-h-[80px]"
-                  autoFocus
-                />
-              ) : (
-                <p
-                  onClick={() => setIsEditingDesc(true)}
-                  className="text-13 leading-1.4 text-second font-normal cursor-pointer hover:bg-neutral-100 p-1 rounded transition whitespace-pre-wrap"
-                  title="Нажмите для редактирования"
-                >
-                  {product.description}
-                </p>
-              )}
-            </section>
-
           </div>
+        </form>
+      </div>
+
+      <footer className="admin-cake-editor-footer">
+        <div>
+          <span>Цена товара</span>
+          <strong>{values.price.toFixed(2)} BYN</strong>
         </div>
-
-        {!isConfiguring && (
-          <footer className="border-t border-neutral-100 p-5 pb-14 flex items-center justify-between bg-white/40 backdrop-blur-md animate-slideUp">
-            <div className="flex flex-col min-w-[50%]">
-              <span className="text-10px uppercase tracking-wider text-neutral-400 font-bold mb-0.5">Стоимость:</span>
-
-              {/* РЕДАКТИРОВАНИЕ ЦЕНЫ */}
-              {isEditingPrice ? (
-                <input
-                  type="text"
-                  value={customPrice !== '' ? customPrice : `${calculatePrice()} BYN`}
-                  onChange={(e) => setCustomPrice(e.target.value)}
-                  onBlur={() => setIsEditingPrice(false)}
-                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingPrice(false)}
-                  className="text-lg font-black text-main leading-none border-b-2 border-accent outline-none bg-transparent w-full"
-                  autoFocus
-                />
-              ) : (
-                <span
-                  onClick={() => setIsEditingPrice(true)}
-                  className="text-lg font-black text-main leading-none cursor-pointer hover:bg-neutral-100 p-1 rounded transition inline-block"
-                  title="Нажмите для изменения цены"
-                >
-                  {product.price_sea}
-                </span>
-              )}
-            </div>
-            <button className="px-6 py-3.5 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-98 transition-all duration-200 tracking-wide text-sm shadow-smВ">
-              Заказать торт
-            </button>
-          </footer>
-        )}
-      </main>
+        {saveError && <p role="alert">{saveError}</p>}
+        <button
+          type="submit"
+          form="admin-cake-form"
+          disabled={isSaving}
+          className="admin-cake-submit"
+        >
+          {isNew ? <Plus aria-hidden="true" size={18} /> : <Save aria-hidden="true" size={18} />}
+          {isSaving ? "Сохраняем…" : isNew ? "Добавить заказ" : "Сохранить изменения"}
+        </button>
+      </footer>
     </div>
   );
 }

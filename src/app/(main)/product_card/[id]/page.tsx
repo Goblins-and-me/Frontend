@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';
 import Image from "next/image";
 import { ChevronLeft, Heart, Check } from 'lucide-react';
 import { Products } from '@/services/ProductService';
+import { getAdminCake, type AdminCake } from "@/services/AdminCakeService";
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +22,24 @@ export default function ProductPage() {
   const [hasConfigured, setHasConfigured] = useState<boolean>(false);
 
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const selectedProduct = Products.find((item) => String(item.id) === id);
+  const [savedProduct, setSavedProduct] = useState<AdminCake | null>(null);
+  const staticProduct = Products.find((item) => String(item.id) === id);
+  const selectedProduct = savedProduct ?? staticProduct;
+
+  useEffect(() => {
+    let isCurrent = true;
+    getAdminCake(id)
+      .then((cake) => {
+        if (isCurrent) setSavedProduct(cake);
+      })
+      .catch((error: unknown) => {
+        console.error("Не удалось загрузить сохранённые данные товара.", error);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [id]);
 
   const handleDecorChange = (id: string) => {
     setDecor(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }));
