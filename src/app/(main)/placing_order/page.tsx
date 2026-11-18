@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
+import { Console } from "console";
 
 const DatePicker = dynamic(() => import("@/components/calendar/Calendar"));
 
@@ -40,14 +41,14 @@ function OrderContent() {
     filling: searchParams.get("filling") ?? "Без начинки",
     weight: searchParams.get("weight") ?? "Некорректный ввод",
     decor: searchParams.get("decor") ?? "Без декора",
-    date: searchParams.get("date") ?? "---",
+    date: "---",
     price: searchParams.get("price") ?? "Некорректный ввод",
   };
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [inscription, setInscription] = useState("");
-  const [pickupDate, setPickupDate] = useState(Cake.date);
+  const [pickupDate, setPickupDate] = useState("---");
   const [showCalendar, setShowCalendar] = useState(false);
 
   return (
@@ -170,6 +171,7 @@ function OrderContent() {
           <button
             type="button"
             className="w-full rounded-2xl bg-rose-300 py-3 text-base font-bold text-white cont"
+            onClick={() => BDPOSTOrder(Cake, name, phone, inscription, pickupDate)}
           >
             Отправить заказ
           </button>
@@ -185,4 +187,31 @@ export default function PlacingOrder() {
       <OrderContent />
     </Suspense>
   );
+}
+
+function BDPOSTOrder(Cake: CakeOrder, name: string, phone: string, inscription: string, pickupDate: string)
+{
+  if(name.length <= 0)
+  {
+    ErorAlert("name");
+    return
+  }
+  if(phone.length <= 0)
+  {
+    ErorAlert("phone");
+    return
+  }
+  if(pickupDate.includes("--"))
+  {
+    ErorAlert("date");
+    return
+  }
+  Cake.date = pickupDate;
+  
+  
+}
+
+function ErorAlert( ErorTipe:string)
+{
+  alert("заполните форму - " + ErorTipe)                         // обработчик ошибок, временно Alert   (мб будет объект с ключами-типами ошибок и полями обработчиками, можно вынести в другой файл и все обработки ошибок делать через него) 
 }
