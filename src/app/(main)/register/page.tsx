@@ -30,6 +30,44 @@ export default function RegisterPage() {
 
         <form className="grid gap-4.5" action={formAction}>
           <label className="grid gap-2 text-sm font-bold text-brand-secondary">
+            <span>Имя</span>
+            <input
+              className="h-12 w-full rounded-xl border border-brand-border bg-brand-surface px-3.5 text-sm font-normal text-brand-ink outline-none transition placeholder:text-brand-quiet focus:border-brand-outline focus:ring-4 focus:ring-brand-outline/15 aria-invalid:border-brand-highlight"
+              type="text"
+              name="name"
+              autoComplete="name"
+              placeholder="Например, Анна"
+              aria-invalid={Boolean(state?.errors?.name)}
+              aria-describedby={state?.errors?.name ? "register-name-error" : undefined}
+              required
+            />
+            {state?.errors?.name && (
+              <span className="text-xs font-normal leading-relaxed text-rose-800" id="register-name-error">
+                {state.errors.name[0]}
+              </span>
+            )}
+          </label>
+
+          <label className="grid gap-2 text-sm font-bold text-brand-secondary">
+            <span>Телефон</span>
+            <input
+              className="h-12 w-full rounded-xl border border-brand-border bg-brand-surface px-3.5 text-sm font-normal text-brand-ink outline-none transition placeholder:text-brand-quiet focus:border-brand-outline focus:ring-4 focus:ring-brand-outline/15 aria-invalid:border-brand-highlight"
+              type="tel"
+              name="phone"
+              autoComplete="tel"
+              placeholder="+375 (__) ___-__-__"
+              aria-invalid={Boolean(state?.errors?.phone)}
+              aria-describedby={state?.errors?.phone ? "register-phone-error" : undefined}
+              required
+            />
+            {state?.errors?.phone && (
+              <span className="text-xs font-normal leading-relaxed text-rose-800" id="register-phone-error">
+                {state.errors.phone[0]}
+              </span>
+            )}
+          </label>
+
+          <label className="grid gap-2 text-sm font-bold text-brand-secondary">
             <span>Email</span>
             <input
               className="h-12 w-full rounded-xl border border-brand-border bg-brand-surface px-3.5 text-sm font-normal text-brand-ink outline-none transition placeholder:text-brand-quiet focus:border-brand-outline focus:ring-4 focus:ring-brand-outline/15 aria-invalid:border-brand-highlight"
