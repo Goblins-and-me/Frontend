@@ -17,7 +17,7 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="w-30 bg-[#EFE8E0] flex flex-col items-center px-4 py-8 gap-5 shadow-sm">
+    <aside className="flex w-30 flex-col items-center gap-5 bg-screen px-4 py-8 shadow-sm">
       {menuItems.map((item) => {
         // Проверяем, активна ли текущая вкладка
         const isActive = pathname === item.href;
@@ -30,8 +30,8 @@ export default function AdminSidebar() {
             className={`w-full py-4 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all duration-200
               ${
                 isActive
-                  ? "bg-white text-[#E47C7C] shadow-sm" // Стили для активной кнопки (белый фон, розоватый текст/иконка)
-                  : "text-[#6E5E53] hover:bg-white/40"  // Стили для обычных кнопок при наведении
+                  ? "bg-white text-brand-highlight shadow-sm"
+                  : "text-brand-subtle hover:bg-white/40"
               }`}
           >
             {/* Обертка для иконки, чтобы задать ей правильный цвет, если SVG поддерживает currentColor */}
@@ -40,7 +40,7 @@ export default function AdminSidebar() {
             </div>
 
             {/* Текст пункта меню */}
-            <span className="text-[11px] font-medium tracking-wide text-center">
+            <span className="text-center text-xs font-medium tracking-wide">
               {item.name}
             </span>
           </Link>

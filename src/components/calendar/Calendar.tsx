@@ -93,7 +93,7 @@ export default function Calendar({
       onClick={onClose}
     >
       <div
-        className="mx-auto w-full max-w-[360px]"
+        className="mx-auto w-full max-w-sm"
         onClick={(event) => event.stopPropagation()}
       >
         <section
@@ -186,7 +186,7 @@ export default function Calendar({
                   </button>
                   <span
                     aria-hidden="true"
-                    className={`text-[9px] leading-none ${
+                    className={`text-xs leading-none ${
                       isDisabled
                         ? "text-separators/50"
                         : occupied > 0

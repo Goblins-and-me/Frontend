@@ -21,7 +21,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="admin-container min-h-dvh bg-screen flex flex-col">
+    <div className="min-h-dvh bg-screen flex flex-col">
       <header>
         <Header
           status={'Admin'}

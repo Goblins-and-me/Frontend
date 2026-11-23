@@ -72,7 +72,7 @@ export default function PlacingOrder() {
     : null;
 
   return (
-    <main className="min-h-[calc(100vh-74px)] bg-screen px-4 py-6 text-main sm:px-8 sm:py-10">
+    <main className="min-h-page-below-header bg-screen px-4 py-6 text-main sm:px-8 sm:py-10">
       <div className="mx-auto w-full max-w-5xl">
         <Link
           href="/"
@@ -83,7 +83,7 @@ export default function PlacingOrder() {
         </Link>
 
         <header className="mb-7 sm:mb-9">
-          <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.12em] text-accent">
+          <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-accent">
             Остался последний шаг
           </p>
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -94,8 +94,8 @@ export default function PlacingOrder() {
           </p>
         </header>
 
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.8fr)] lg:gap-7">
-          <div className="space-y-5">
+        <div className="grid items-start gap-5 lg:grid-cols-5 lg:gap-7">
+          <div className="space-y-5 lg:col-span-3">
             <section
               aria-labelledby="contact-heading"
               className="rounded-3xl border border-border bg-white p-5 shadow-sm sm:p-7"
@@ -226,7 +226,7 @@ export default function PlacingOrder() {
             </section>
           </div>
 
-          <aside className="space-y-4 lg:sticky lg:top-6">
+          <aside className="space-y-4 lg:col-span-2 lg:sticky lg:top-6">
             <section
               aria-labelledby="summary-heading"
               className="rounded-3xl border border-border bg-white p-5 shadow-sm sm:p-6"
@@ -277,7 +277,7 @@ export default function PlacingOrder() {
                 </div>
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-second">Самовывоз</dt>
-                  <dd className="max-w-[60%] text-right font-semibold">
+                  <dd className="max-w-3/5 text-right font-semibold">
                     {formattedPickupDate ?? "Выберите дату"}
                   </dd>
                 </div>
