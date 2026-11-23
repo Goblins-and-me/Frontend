@@ -7,6 +7,7 @@ import { AuthError } from "next-auth";
 export type ActionState = {
   errors?: Record<string, string[]>;
   message?: string;
+  error?: string;
 } | null;
 
 export async function registerUser(
@@ -32,14 +33,14 @@ export async function registerUser(
     return { errors };
   }
 
-  const { email, password, confirmPassword } = validated.data;
+  const { email, password } = validated.data;
 
   // 2. Запрос на внешний бэкенд
   try {
     const res = await fetch(`${process.env.BACKEND_URL}/v1/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, confirmPassword }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) {
@@ -50,8 +51,11 @@ export async function registerUser(
       }
       return { message: data?.message || "Ошибка при регистрации" };
     }
-  } catch (err) {
-    return { message: "Сервер временно недоступен" };
+  } catch (error) {
+    return {
+      message: "Сервер временно недоступен",
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 
   // 3. Автологин сразу после успешной регистрации
