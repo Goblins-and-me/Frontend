@@ -37,7 +37,7 @@ export async function registerUser(
 
   // 2. Запрос на внешний бэкенд
   try {
-    const res = await fetch(`${process.env.BACKEND_URL}/v1/auth/register`, {
+    const res = await fetch(`${process.env.BACKEND_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
