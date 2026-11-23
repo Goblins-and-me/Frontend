@@ -33,14 +33,14 @@ export async function registerUser(
     return { errors };
   }
 
-  const { email, password } = validated.data;
+  const { name, phone, email, password } = validated.data;
 
   // 2. Запрос на внешний бэкенд
   try {
     const res = await fetch(`${process.env.BACKEND_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ name, phone, email, password }),
     });
 
     if (!res.ok) {
