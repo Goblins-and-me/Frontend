@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getUserOrders } from "@/services/OrderService";
+import { getUserOrders, UserOrder } from "@/services/OrderService";
 import OrderCard from "@/components/orders/OrderCard";
 import { redirect } from "next/navigation";
 
@@ -7,15 +7,13 @@ import { redirect } from "next/navigation";
 
 export default async function OrderPage() {
 
-  let orders;
+  let orders: UserOrder[] = [];
 
   try {
     orders = await getUserOrders();
-
   }
   catch (error) {
     console.error("Error fetching user orders:", error);
-    redirect("/error");
   }
 
 
