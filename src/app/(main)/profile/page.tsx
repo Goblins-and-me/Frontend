@@ -1,7 +1,8 @@
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { CakeSlice, LogOut, Mail, ShoppingBag, Trash2, UserRound } from "lucide-react";
+import { CakeSlice, LogOut, Mail, ShoppingBag, UserRound } from "lucide-react";
+import DeleteAccountModal from "@/components/profile/DeleteAccountModal";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -130,19 +131,7 @@ export default async function ProfilePage() {
               </button>
             </form>
 
-            <div>
-              <button
-                type="button"
-                disabled
-                className="flex min-h-12 w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-border bg-screen px-4 text-sm font-bold text-second opacity-70"
-              >
-                <Trash2 aria-hidden="true" size={17} />
-                Удалить аккаунт
-              </button>
-              <p className="mt-2 text-center text-xs text-second">
-                Удаление аккаунта пока недоступно.
-              </p>
-            </div>
+            <DeleteAccountModal />
           </div>
         </section>
       </div>
