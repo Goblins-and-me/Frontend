@@ -79,7 +79,7 @@ export default function Orders() {
               type="button"
               onClick={() => setFilter(item.value)}
               aria-pressed={isActive}
-              className={`rounded-full border px-2 py-1 text-[10px] font-medium transition-colors ${
+              className={`rounded-full border px-2 py-1 text-xs font-medium transition-colors ${
                 isActive
                   ? "border-accent bg-accent text-white"
                   : "border-border bg-white text-second hover:bg-card"
@@ -101,18 +101,15 @@ export default function Orders() {
                 setIsEditing(false);
               }}
               aria-pressed={selectedOrderId === order.id}
-              className="flex min-h-14.5 w-full items-center gap-2 rounded-[14px] border border-border bg-white px-3 text-left transition-colors hover:border-accent"
-              style={{
-                borderColor: selectedOrderId === order.id ? "#FF6B6B" : "transparent",
-              }}
+              className="flex min-h-14 w-full items-center gap-2 rounded-2xl border border-border bg-white px-3 text-left transition-colors hover:border-accent aria-pressed:border-brand-accent"
             >
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-[11px] font-medium leading-4 text-accent">№ {order.id}</span>
-                <span className="truncate text-[13px] font-semibold leading-4">{order.name}</span>
+                <span className="text-xs font-medium leading-4 text-accent">№ {order.id}</span>
+                <span className="truncate text-sm font-semibold leading-4">{order.name}</span>
               </span>
               <span className="flex shrink-0 flex-col items-end gap-0.5">
-                <span className="text-[10px] leading-4 text-second">{order.date}</span>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium leading-4 ${statusStyles[order.status]}`}>
+                <span className="text-xs leading-4 text-second">{order.date}</span>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-medium leading-4 ${statusStyles[order.status]}`}>
                   {statusLabels[order.status]}
                 </span>
               </span>
@@ -120,7 +117,7 @@ export default function Orders() {
           </li>
         ))}
         {visibleOrders.length === 0 && (
-          <li className="rounded-[14px] border border-border bg-white px-3 py-5 text-center text-xs text-second">
+          <li className="rounded-2xl border border-border bg-white px-3 py-5 text-center text-xs text-second">
             Заказов с таким статусом нет
           </li>
         )}
@@ -131,7 +128,7 @@ export default function Orders() {
           type="button"
           onClick={deleteSelectedOrder}
           disabled={!selectedOrder}
-          className="min-h-9 rounded-xl bg-card px-2 text-[11px] font-semibold text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-h-9 rounded-xl bg-card px-2 text-xs font-semibold text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Удалить
         </button>
@@ -139,7 +136,7 @@ export default function Orders() {
           type="button"
           onClick={() => setIsEditing((editing) => !editing)}
           disabled={!selectedOrder}
-          className="min-h-9 rounded-xl bg-accent px-2 text-[11px] font-semibold text-white transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-h-9 rounded-xl bg-accent px-2 text-xs font-semibold text-white transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
           Изменить
         </button>

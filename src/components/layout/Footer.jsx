@@ -15,7 +15,7 @@ export default function Footer() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white px-6 py-2 shadow-sm">
+    <nav className="fixed inset-x-0 bottom-0 z-50 bg-white px-6 pt-2 shadow-sm pb-safe-nav">
       <div className="mx-auto flex max-w-md items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -26,10 +26,10 @@ export default function Footer() {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center gap-1 transition-colors ${
-                isActive ? 'text-[#E07A8A]' : 'text-gray-500 hover:text-gray-800'
+                isActive ? 'text-brand-highlight' : 'text-gray-500 hover:text-gray-800'
               }`}
             >
-              <Icon className="h-6 w-6 stroke-[1.5]" />
+              <Icon className="size-6 stroke-2" />
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );

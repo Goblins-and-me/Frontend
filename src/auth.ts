@@ -60,7 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         try {
           // 1. Запрос на FastAPI с сервера Next.js
-          const res = await fetch(`${process.env.BACKEND_URL}/v1/auth/login`, {
+          const res = await fetch(`${process.env.BACKEND_URL}/api/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -119,7 +119,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async signOut() {
       const cookieStore = await cookies();
       cookieStore.delete("access_token");
-      cookieStore.delete({ name: "refresh_token", path: "/v1/auth/refresh" });
+      cookieStore.delete({ name: "refresh_token", path: "/api/auth/logout" });
     },
   },
 });

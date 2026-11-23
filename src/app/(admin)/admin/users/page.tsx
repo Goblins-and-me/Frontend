@@ -72,7 +72,7 @@ export default function Users() {
                             type="button"
                             onClick={() => setFilter(item.value)}
                             aria-pressed={isActive}
-                            className={`rounded-full border px-3 py-1 text-[10px] font-medium transition-colors ${
+                            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                                 isActive
                                     ? "border-accent bg-accent text-white"
                                     : "border-border bg-white text-second hover:bg-card"
@@ -91,10 +91,7 @@ export default function Users() {
                             type="button"
                             onClick={() => setSelectedCustomer(customer.id)}
                             aria-pressed={selectedCustomer === customer.id}
-                              className="flex min-h-13.75 w-full items-center gap-2.5 rounded-[14px] border border-border bg-white px-3 text-left transition-colors hover:border-accent"
-                              style={{
-                                borderColor: selectedCustomer === customer.id ? "#FF6B6B" : "transparent",
-                              }}
+                            className="flex min-h-14 w-full items-center gap-2.5 rounded-2xl border border-border bg-white px-3 text-left transition-colors hover:border-accent aria-pressed:border-brand-accent"
                         >
                             <span
                                 aria-label={customer.status === "online" ? "Онлайн" : "Офлайн"}
@@ -103,10 +100,10 @@ export default function Users() {
                                 }`}
                             />
                             <span className="flex min-w-0 flex-1 flex-col">
-                                <span className="truncate text-[13px] font-semibold leading-4">{customer.name}</span>
-                                <span className="text-[11px] leading-4 text-second">{formatOrders(customer.orders)}</span>
+                                <span className="truncate text-sm font-semibold leading-4">{customer.name}</span>
+                                <span className="text-xs leading-4 text-second">{formatOrders(customer.orders)}</span>
                             </span>
-                            <span className="shrink-0 text-[10px] text-separators">{customer.lastSeen}</span>
+                            <span className="shrink-0 text-xs text-separators">{customer.lastSeen}</span>
                         </button>
                     </li>
                 ))}
@@ -117,14 +114,14 @@ export default function Users() {
                     type="button"
                     disabled={selectedCustomer === null}
                     onClick={toggleBlock}
-                      className="min-h-9 rounded-xl bg-card px-2 text-[11px] font-semibold text-deleting transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="min-h-9 rounded-xl bg-card px-2 text-xs font-semibold text-deleting transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     {isSelectedBlocked ? "Разблокировать" : "Блокировать"}
                 </button>
                 <button
                     type="button"
                     disabled={selectedCustomer === null}
-                    className="min-h-9 rounded-xl bg-accent px-2 text-[11px] font-semibold text-white transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="min-h-9 rounded-xl bg-accent px-2 text-xs font-semibold text-white transition-colors hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     Написать
                 </button>

@@ -22,10 +22,10 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main className="min-h-[calc(100vh-74px)] bg-screen px-5 py-8 text-main sm:px-8 sm:py-12">
+    <main className="min-h-page-below-header bg-screen px-5 py-8 text-main sm:px-8 sm:py-12">
       <div className="mx-auto w-full max-w-3xl">
         <header className="mb-7 sm:mb-9">
-          <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.12em] text-accent">
+          <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-accent">
             Sweet Story
           </p>
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
