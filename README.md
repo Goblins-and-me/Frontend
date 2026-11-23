@@ -52,6 +52,17 @@ npm run dev
 ```
 Откройте [http://localhost:3000](http://localhost:3000) в браузере для просмотра результата.
 
+### Cloudinary для фото в админ-панели
+1. Создайте в Cloudinary **unsigned upload preset** и ограничьте в нём допустимые типы файлов и размер загрузки.
+2. Добавьте в `.env.local`:
+   ```env
+   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+   NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_unsigned_upload_preset
+   ```
+3. Перезапустите `npm run dev`, чтобы Next.js применил переменные окружения.
+
+Форма торта загружает изображение напрямую через Cloudinary Upload Widget. При сохранении в mock-запрос передаются только данные формы и URL `image` из Cloudinary; локальная копия данных сохраняется в браузере. Для реального API замените mock-сохранение `saveAdminCake` в `src/services/AdminCakeService.ts`.
+
 ---
 
 ## 📁 Структура директорий

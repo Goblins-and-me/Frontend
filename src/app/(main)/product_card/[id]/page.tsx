@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';
 import Image from "next/image";
 import { ChevronLeft, Heart, Check } from 'lucide-react';
 import { Products } from '@/services/ProductService';
+import { getAdminCake, type AdminCake } from "@/services/AdminCakeService";
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +22,24 @@ export default function ProductPage() {
   const [hasConfigured, setHasConfigured] = useState<boolean>(false);
 
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const selectedProduct = Products.find((item) => String(item.id) === id);
+  const [savedProduct, setSavedProduct] = useState<AdminCake | null>(null);
+  const staticProduct = Products.find((item) => String(item.id) === id);
+  const selectedProduct = savedProduct ?? staticProduct;
+
+  useEffect(() => {
+    let isCurrent = true;
+    getAdminCake(id)
+      .then((cake) => {
+        if (isCurrent) setSavedProduct(cake);
+      })
+      .catch((error: unknown) => {
+        console.error("Не удалось загрузить сохранённые данные товара.", error);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [id]);
 
   const handleDecorChange = (id: string) => {
     setDecor(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }));
@@ -64,9 +82,9 @@ export default function ProductPage() {
 
 
   return (
-    <div className="product-card-cont bg-screen antialiased">
-      <main className="product-detail-main flex w-full flex-col bg-screen">
-        <div className="product-detail-header flex shrink-0 items-center justify-between px-6 pt-5 pb-3">
+    <div className="mx-auto w-full max-w-xl bg-screen antialiased md:max-w-3xl lg:max-w-7xl">
+      <main className="flex min-h-page-below-header w-full flex-col bg-screen">
+        <div className="flex min-h-16 shrink-0 items-center justify-between px-6 pt-5 pb-3 md:px-8 lg:px-10 lg:pt-6 lg:pb-4">
           <Link href="/" className="w-10 h-10 flex items-center justify-start text-main hover:opacity-70 transition" aria-label="Назад">
             <ChevronLeft className="w-6 h-6" strokeWidth={2} />
           </Link>
@@ -87,8 +105,8 @@ export default function ProductPage() {
           </button>
         </div>
 
-        <div className="product-detail-layout">
-          <div className="product-detail-image relative w-full h-64 max-h-64 rounded-2xl mb-4 select-none overflow-hidden bg-neutral-50 flex items-center justify-center">
+        <div className="px-6 pb-6 md:px-8 md:pb-10 lg:grid lg:grid-cols-2 lg:items-start lg:gap-11 lg:px-10 lg:pt-4 lg:pb-12">
+          <div className="relative mb-4 flex h-64 max-h-64 w-full select-none items-center justify-center overflow-hidden rounded-2xl bg-neutral-50 md:h-product-image-tablet md:max-h-product-image-tablet lg:mb-0 lg:h-product-image lg:rounded-3xl">
             {product.image && (
               <Image
                 src={product.image}
@@ -100,30 +118,32 @@ export default function ProductPage() {
             )}
           </div>
 
-          <div className="product-detail-info">
-            <section className={`product-detail-summary min-h-0 overflow-y-auto pr-1${isConfiguring ? ' is-mobile-hidden' : ''}`}>
-              <h2 className="text-xl font-black mb-1.5 text-main tracking-tight">{product.title}</h2>
-              <p className="text-13 leading-1.4 text-second font-normal">
+          <div className="flex min-w-0 flex-col">
+            <section className={`min-h-0 overflow-y-auto pr-1${isConfiguring ? " hidden md:block" : ""}`}>
+              <h2 className="mb-1.5 text-xl font-black tracking-tight text-main lg:mb-3 lg:text-4xl">
+                {product.title}
+              </h2>
+              <p className="text-sm font-normal leading-relaxed text-second lg:text-base">
                 {product.description}
               </p>
             </section>
 
-            <div className={`product-detail-config flex flex-col text-left pt-2 animate-fadeIn${isConfiguring ? ' is-mobile-visible' : ''}`}>
-              <h3 className="text-xs text-second font-bold mb-3 uppercase tracking-wider text-center">
+            <div className={`${isConfiguring ? "flex" : "hidden"} flex-col pt-2 text-left md:flex lg:pt-6`}>
+              <h3 className="mb-3 text-center text-xs font-bold uppercase tracking-wider text-second md:hidden">
                 Настройка торта
               </h3>
 
-              <div className="product-detail-config-options pr-1 space-y-4 select-none scrollbar-thin">
-                <div className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm">
+              <div className="grid select-none gap-4 pr-1 md:grid-cols-2 md:gap-3.5 md:space-y-0 lg:grid-cols-1 lg:gap-4">
+                <div className="rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm md:col-span-2 lg:col-span-1 lg:rounded-3xl lg:p-5">
                   <div className="flex justify-between items-center mb-1">
                     <h4 className="font-bold text-main text-sm">Вес торта</h4>
                     <span className="text-xs text-neutral-400 font-medium">60 BYN / кг</span>
                   </div>
                   <div className="flex justify-between items-baseline mb-3">
-                    <span className="text-11 text-neutral-400">Выбранный вес</span>
+                    <span className="text-xs text-neutral-400">Выбранный вес</span>
                     <span className="text-lg font-black text-accent">{weight} кг</span>
                   </div>
-                  <div className="flex items-center gap-2 text-11px text-second font-medium">
+                  <div className="flex items-center gap-2 text-xs font-medium text-second">
                     <span>1 кг</span>
                     <input
                       type="range"
@@ -157,7 +177,7 @@ export default function ProductPage() {
                             setFilling(fillingItem.id);
                             setHasConfigured(true);
                           }}
-                          className={`w-full flex justify-between items-center px-4 py-3 rounded-xl border text-xs font-bold transition-all ${isSelected
+                          className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-xs font-bold transition-all ${isSelected
                             ? 'bg-card border-accent text-accent'
                             : 'bg-white border-neutral-100 text-main hover:bg-screen'
                             }`}
@@ -172,7 +192,7 @@ export default function ProductPage() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm">
+                <div className="rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm lg:rounded-3xl lg:p-5">
                   <h4 className="font-bold text-main text-sm mb-3">Декор торта</h4>
                   <div className="space-y-3">
                     {[
@@ -209,11 +229,11 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <div className="product-detail-actions mt-4 pt-2">
+            <div className="mt-4 pt-2">
               {!isConfiguring ? (
                 <button
                   onClick={() => setIsConfiguring(true)}
-                  className="product-detail-settings-start w-full py-3 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all duration-200 tracking-wide text-sm shadow-sm"
+                  className="w-full rounded-2xl bg-accent py-3 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 md:hidden"
                 >
                   Настроить
                 </button>
@@ -223,19 +243,19 @@ export default function ProductPage() {
                     setHasConfigured(true);
                     setIsConfiguring(false);
                   }}
-                  className="product-detail-settings-confirm w-full py-4 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-99 transition-all duration-200 tracking-wide text-sm shadow-sm"
+                  className="w-full rounded-2xl bg-accent py-4 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 md:hidden"
                 >
                   Подтвердить : {product.price_sea}
                 </button>
               )}
             </div>
 
-            <footer className={`product-detail-purchase border-t border-neutral-100 p-5 flex items-center justify-between backdrop-blur-md animate-slideUp${isConfiguring ? ' is-mobile-hidden' : ''}`}>
+            <footer className={`flex items-center justify-between border-t border-neutral-100 p-5 backdrop-blur-md${isConfiguring ? " hidden md:flex" : ""} lg:mt-6 lg:border-t-brand-border lg:bg-transparent lg:px-0 lg:pt-5 lg:pb-0 lg:backdrop-blur-none`}>
               <div className="flex flex-col">
-                <span className="text-10px uppercase tracking-wider text-neutral-400 font-bold mb-0.5">Стоимость:</span>
+                <span className="mb-0.5 text-xs font-bold uppercase tracking-wider text-neutral-400">Стоимость:</span>
                 <span className="text-lg font-black text-main leading-none">{product.price_sea}</span>
               </div>
-              <Link href="/placing_order" className="px-6 py-3.5 bg-accent text-white font-bold rounded-2xl hover:opacity-90 active:scale-98 transition-all duration-200 tracking-wide text-sm shadow-sm">
+              <Link href="/placing_order" className="rounded-2xl bg-accent px-6 py-3.5 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 lg:whitespace-nowrap">
                 Заказать торт
               </Link>
             </footer>
