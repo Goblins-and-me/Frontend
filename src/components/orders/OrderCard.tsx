@@ -1,4 +1,4 @@
-import {type UserOrder } from "@/services/OrderService";
+import { type KnownOrderStatus, type UserOrder } from "@/types/order";
 import { CalendarDays, Clock3 } from "lucide-react";
 import Image from "next/image";
 
@@ -15,17 +15,23 @@ const priceFormatter = new Intl.NumberFormat("ru-RU", {
   maximumFractionDigits: 2,
 });
 
-const statusLabels: Record<UserOrder["status"], string> = {
+const statusLabels: Record<KnownOrderStatus, string> = {
   preparing: "Готовится",
   ready: "Готов к выдаче",
   completed: "Завершён",
+  cancelled: "Отменён",
 };
 
-const statusClasses: Record<UserOrder["status"], string> = {
+const statusClasses: Record<KnownOrderStatus, string> = {
   preparing: "bg-amber-50 text-amber-800",
   ready: "bg-emerald-50 text-emerald-800",
   completed: "bg-stone-100 text-stone-700",
+  cancelled: "bg-rose-50 text-rose-800",
 };
+
+function isKnownOrderStatus(status: string): status is KnownOrderStatus {
+  return Object.prototype.hasOwnProperty.call(statusLabels, status);
+}
 
 
 export default function OrderCard({
@@ -35,6 +41,8 @@ export default function OrderCard({
   order: UserOrder;
   priority: boolean;
 }) {
+  const knownStatus = isKnownOrderStatus(order.status) ? order.status : null;
+
   return (
     <article className="grid grid-cols-1 overflow-hidden rounded-3xl border border-brand-border bg-brand-surface shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg md:grid-cols-4">
       <div className="relative h-52 overflow-hidden bg-brand-soft md:col-span-1 md:h-auto md:min-h-56">
@@ -58,8 +66,8 @@ export default function OrderCard({
               {order.title}
             </h2>
           </div>
-          <span className={`shrink-0 rounded-full px-3 py-2 text-xs font-bold ${statusClasses[order.status]}`}>
-            {statusLabels[order.status]}
+          <span className={`shrink-0 rounded-full px-3 py-2 text-xs font-bold ${knownStatus ? statusClasses[knownStatus] : "bg-stone-100 text-stone-700"}`}>
+            {knownStatus ? statusLabels[knownStatus] : order.status}
           </span>
         </div>
 

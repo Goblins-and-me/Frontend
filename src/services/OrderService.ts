@@ -1,37 +1,4 @@
-export type UserOrderStatus = 'preparing' | 'completed' | 'cancelled' | 'ready' | string;
-
-export type UserOrder = {
-  id: string;
-  title: string;
-  image: string;
-  // placedAt: string;
-  readyAt: string;
-  price: number;
-  status: UserOrderStatus;
-};
-
-export interface OrderProduct {
-  id: string;
-  name: string;
-  image_url: string;
-}
-
-export type OrderStatus = 'preparing' | 'completed' | 'cancelled' | 'ready' | string;
-
-export interface ServerResponseOrder {
-  id: string;
-  delivery_date: string;
-  product: OrderProduct;
-  filling: string;
-  decor: string;
-  weight: string;
-  order_price: string; // В JSON пришло строкой ("130"), при необходимости можно парсить в number
-  order_status: OrderStatus;
-}
-
-interface OrdersApiResponse {
-  orders: ServerResponseOrder[];
-}
+import { UserOrder, OrdersApiResponse, ServerResponseOrder } from "@/types/order";
 
 // const mockUserOrders: UserOrder[] = [
 //   {

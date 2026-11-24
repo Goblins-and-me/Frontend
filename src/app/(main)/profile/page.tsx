@@ -12,6 +12,7 @@ export default async function ProfilePage() {
   }
 
   const displayName = session.user.name?.trim() || "Пользователь";
+  const phone = session.user.phone?.trim() || "Телефон не указан";
   const email = session.user.email || "Email не указан";
   const avatarInitial = (session.user.name?.trim() || session.user.email || "П")
     .charAt(0)
@@ -99,11 +100,11 @@ export default async function ProfilePage() {
 
             <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-screen p-4">
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-accent">
-                <CakeSlice aria-hidden="true" size={19} />
+                <Mail aria-hidden="true" size={19} />
               </span>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-second">Любимый десерт</p>
-                <p className="truncate text-sm font-bold text-second">Пока не указан</p>
+                <p className="text-xs font-medium text-second">Номер телефона</p>
+                <p className="truncate text-sm font-bold">{phone}</p>
               </div>
             </div>
           </div>
