@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getUserOrders, UserOrder } from "@/services/OrderService";
+import { getUserOrders } from "@/services/OrderService";
+import { UserOrder } from "@/types/order";
 import OrderCard from "@/components/orders/OrderCard";
 import { redirect } from "next/navigation";
 
