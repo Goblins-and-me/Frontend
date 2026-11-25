@@ -1,13 +1,6 @@
-import {
-  createAdminProduct,
-  updateAdminProduct,
-} from "@/app/(admin)/admin/product_card/[id]/actions";
-import {
-  fetchAdminProducts
-} from "@/lib/galary"
-import type {
-  AdminProductCreateRequest,
-} from "@/types/adminCake";
+import { updateAdminProduct } from "@/app/(admin)/admin/product_card/[id]/actions";
+import { fetchAdminProducts } from "@/lib/galary";
+import type { AdminProductUpdateRequest } from "@/types/adminCake";
 import type { Cake } from "@/types/cakes";
 
 export const cakeFillings = [
@@ -35,17 +28,21 @@ export type AdminCakeValues = {
   name: string;
   description: string;
   price: number;
-  image: string;
-  weight: number;
-  fillingId: CakeFillingId;
-  decorIds: CakeDecorationId[];
+  images: string[];
+  fillings: string[];
+  decorations: string[];
+  minWeight: string;
+  maxWeight: string;
 };
 
 export type AdminCake = AdminCakeValues & {
   id: string;
+  image: string;
 };
 
 const basePricePerKg = 60;
+const defaultMinWeight = "1";
+const defaultMaxWeight = "5";
 
 export function calculateAdminCakePrice(
   weight: number,
@@ -61,21 +58,46 @@ export function calculateAdminCakePrice(
   return Math.round(basePricePerKg * weight + fillingCost + decorationsCost);
 }
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function toWeight(value: unknown, fallback: string): string {
+  if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) {
+    return value;
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+  return fallback;
+}
+
 function toAdminCake(product: Cake): AdminCake {
   const price = Number(product.cake_price);
   if (!Number.isFinite(price)) {
     throw new Error(`У товара ${product.id} указана некорректная цена.`);
   }
 
+  const images =
+    isStringArray(product.images) && product.images.length > 0
+      ? product.images
+      : product.image_url
+        ? [product.image_url]
+        : [];
+  const minWeight = toWeight(product.minWeight, defaultMinWeight);
+  const maxWeight = toWeight(product.maxWeight, defaultMaxWeight);
+
   return {
     id: String(product.id),
     name: product.name,
     description: product.description,
     price,
-    image: product.image_url ?? "",
-    weight: 2,
-    fillingId: "snickers",
-    decorIds: [],
+    images,
+    image: images[0] ?? "",
+    fillings: isStringArray(product.fillings) ? product.fillings : [],
+    decorations: isStringArray(product.decorations) ? product.decorations : [],
+    minWeight,
+    maxWeight: Number(maxWeight) < Number(minWeight) ? minWeight : maxWeight,
   };
 }
 
@@ -90,35 +112,25 @@ export async function getAdminCake(id: string): Promise<AdminCake | null> {
 }
 
 export async function saveAdminCake(
-  id: string | null,
+  id: string,
   values: AdminCakeValues,
 ): Promise<AdminCake> {
-  const product = {
+  const product: AdminProductUpdateRequest = {
     name: values.name,
-    images: [values.image],
+    images: values.images,
     description: values.description,
+    fillings: values.fillings,
+    decorations: values.decorations,
+    minWeight: values.minWeight,
+    maxWeight: values.maxWeight,
     cake_price: String(values.price),
   };
 
-  if (id) {
-    await updateAdminProduct(id, product);
-    return {
-      ...values,
-      id,
-    };
-  }
+  await updateAdminProduct(id, product);
 
-  const newProduct: AdminProductCreateRequest = {
-    ...product,
-    fillings: [values.fillingId],
-    decorations: values.decorIds,
-    minWeight: values.weight,
-    maxWeight: values.weight,
-  };
-
-  const createdProduct = await createAdminProduct(newProduct);
   return {
     ...values,
-    id: String(createdProduct.id),
+    id,
+    image: values.images[0] ?? "",
   };
 }

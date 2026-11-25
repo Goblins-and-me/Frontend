@@ -29,7 +29,7 @@ export default function Home() {
         if (!isCurrent) return;
         setCakes(
           products.map((product) => ({
-            image: product.image_url || "/cake.png",
+            image: product.image_url || product.images?.[0] || "/cake.png",
             name: product.name,
             description: product.description,
             price: Number(product.cake_price),

@@ -4,39 +4,105 @@ import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';
 import Image from "next/image";
-import { ChevronLeft, Heart, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { Products } from '@/services/ProductService';
-import { getAdminCake, type AdminCake } from "@/services/AdminCakeService";
+import { getProductCard } from './actions';
+import type { ProductCard } from '@/types/productCard';
+
+const fallbackFillings = ['«Сникерс»', '«Красный бархат»', '«Манго-маракуйя»'];
+const fallbackDecorations = ['Свежие ягоды', 'Шоколадные фигуры', 'Печать фото'];
+
+const fillingPrices: Record<string, number> = {
+  snickers: 0,
+  сникерс: 0,
+  velvet: 5,
+  'красный бархат': 5,
+  mango: 8,
+  манго: 8,
+  'манго-маракуйя': 8,
+  'манго маракуйя': 8,
+};
+
+const decorationPrices: Record<string, number> = {
+  berries: 15,
+  ягоды: 15,
+  'свежие ягоды': 15,
+  figures: 20,
+  фигуры: 20,
+  'шоколадные фигуры': 20,
+  photo: 10,
+  фото: 10,
+  'печать фото': 10,
+};
+
+const priceFormatter = new Intl.NumberFormat('ru-RU', {
+  maximumFractionDigits: 2,
+});
+
+function normalizeOptionName(value: string): string {
+  return value
+    .replace(/[«»"']/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLocaleLowerCase('ru-RU');
+}
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
 
-  const [weight, setWeight] = useState<number>(2.5);
-  const [filling, setFilling] = useState<string>('snickers');
-  const [decor, setDecor] = useState({
-    berries: true,
-    figures: false,
-    photo: false,
-  });
+  const [weight, setWeight] = useState<number>(1);
+  const [filling, setFilling] = useState<string>(fallbackFillings[0]);
+  const [decor, setDecor] = useState<Record<string, boolean>>({});
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isConfiguring, setIsConfiguring] = useState<boolean>(false);
   const [hasConfigured, setHasConfigured] = useState<boolean>(false);
 
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const [savedProduct, setSavedProduct] = useState<AdminCake | null>(null);
+  const [productCard, setProductCard] = useState<ProductCard | null>(null);
   const [loadedProductId, setLoadedProductId] = useState<string | null>(null);
   const isLoading = loadedProductId !== id;
+
   const staticProduct = Products.find((item) => String(item.id) === id);
-  const selectedProduct = savedProduct ?? staticProduct;
+  const fallbackProduct: ProductCard | null = staticProduct
+    ? {
+        id: String(staticProduct.id),
+        name: staticProduct.name,
+        images: [staticProduct.image],
+        description: staticProduct.description,
+        fillings: [...fallbackFillings],
+        decorations: [...fallbackDecorations],
+        minWeight: 1,
+        maxWeight: 5,
+        price: staticProduct.price,
+      }
+    : null;
+  const selectedProduct = productCard ?? fallbackProduct;
 
   useEffect(() => {
     let isCurrent = true;
 
-    getAdminCake(id)
-      .then((cake) => {
-        if (isCurrent) setSavedProduct(cake);
+    getProductCard(id)
+      .then((product) => {
+        if (!isCurrent) return;
+
+        setProductCard(product);
+        setIsConfiguring(false);
+        setHasConfigured(false);
+        setActiveImageIndex(0);
+        setDecor({});
+        setWeight(product?.minWeight ?? 1);
+        setFilling(product?.fillings[0] ?? '');
       })
       .catch((error: unknown) => {
-        console.error("Не удалось загрузить сохранённые данные товара.", error);
+        console.error("Не удалось загрузить карточку товара.", error);
+        if (!isCurrent) return;
+
+        setProductCard(null);
+        setIsConfiguring(false);
+        setHasConfigured(false);
+        setActiveImageIndex(0);
+        setDecor({});
+        setWeight(1);
+        setFilling(fallbackFillings[0]);
       })
       .finally(() => {
         if (isCurrent) setLoadedProductId(id);
@@ -47,23 +113,9 @@ export default function ProductPage() {
     };
   }, [id]);
 
-  const handleDecorChange = (id: string) => {
-    setDecor(prev => ({ ...prev, [id]: !prev[id as keyof typeof prev] }));
+  const handleDecorChange = (name: string) => {
+    setDecor((current) => ({ ...current, [name]: !current[name] }));
     setHasConfigured(true);
-  };
-
-  const calculatePrice = (): number => {
-    let basePricePerKg = 60;
-    if (filling === 'velvet') basePricePerKg += 5;
-    if (filling === 'mango') basePricePerKg += 8;
-
-    let totalPrice = basePricePerKg * weight;
-
-    if (decor.berries) totalPrice += 15;
-    if (decor.figures) totalPrice += 20;
-    if (decor.photo) totalPrice += 10;
-
-    return Math.round(totalPrice);
   };
 
   if (isLoading) {
@@ -95,14 +147,56 @@ export default function ProductPage() {
     );
   }
 
+  const productPrice = selectedProduct.price;
+  const fillings = selectedProduct.fillings;
+  const decorations = selectedProduct.decorations;
+  const minWeight = selectedProduct.minWeight;
+  const maxWeight = Math.max(minWeight, selectedProduct.maxWeight);
+  const basePricePerKg =
+    Number.isFinite(productPrice) && productPrice > 0
+      ? productPrice / minWeight
+      : 60;
+  const fillingExtraPerKg = fillingPrices[normalizeOptionName(filling)] ?? 0;
+
+  const productImages = selectedProduct.images;
+
+  const safeImageIndex = productImages.length > 0
+    ? Math.min(activeImageIndex, productImages.length - 1)
+    : 0;
+  const activeImage = productImages[safeImageIndex] ?? '';
+
+  const goToImage = (direction: -1 | 1) => {
+    if (productImages.length <= 1) return;
+    setActiveImageIndex(
+      (current) => (current + direction + productImages.length) % productImages.length,
+    );
+  };
+
+  const calculatePrice = (): number => {
+    const decorationsCost = decorations.reduce(
+      (total, item) =>
+        decor[item]
+          ? total + (decorationPrices[normalizeOptionName(item)] ?? 0)
+          : total,
+      0,
+    );
+
+    return Math.round((basePricePerKg + fillingExtraPerKg) * weight + decorationsCost);
+  };
+
+  const priceText = `${priceFormatter.format(
+    isConfiguring || hasConfigured
+      ? calculatePrice()
+      : Number.isFinite(productPrice)
+        ? productPrice
+        : 0,
+  )} BYN`;
+
   const product = {
     title: selectedProduct.name,
     description: selectedProduct.description,
-    price_sea: `${isConfiguring || hasConfigured ? calculatePrice() : selectedProduct.price.toFixed(2)} BYN`,
-    image: selectedProduct.image,
+    price_sea: priceText,
   };
-
-
 
   return (
     <div className="mx-auto w-full max-w-xl bg-screen antialiased md:max-w-3xl lg:max-w-7xl">
@@ -114,30 +208,75 @@ export default function ProductPage() {
           <h1 className="text-lg font-bold tracking-wide text-main">
             {isConfiguring ? 'Настройка торта' : 'Карточка товара'}
           </h1>
-
-          <button
-            onClick={() => setIsFavorite(!isFavorite)}
-            className="w-10 h-10 flex items-center justify-end text-main hover:opacity-70 transition"
-            aria-label="В избранное"
-          >
-            <Heart
-              className={`w-6 h-6 transition-colors duration-200 ${isFavorite ? 'text-red-500' : 'text-main'}`}
-              strokeWidth={1.8}
-              fill={isFavorite ? 'currentColor' : 'none'}
-            />
-          </button>
         </div>
 
         <div className="px-6 pb-6 md:px-8 md:pb-10 lg:grid lg:grid-cols-2 lg:items-start lg:gap-11 lg:px-10 lg:pt-4 lg:pb-12">
-          <div className="relative mb-4 flex h-64 max-h-64 w-full select-none items-center justify-center overflow-hidden rounded-2xl bg-neutral-50 md:h-product-image-tablet md:max-h-product-image-tablet lg:mb-0 lg:h-product-image lg:rounded-3xl">
-            {product.image && (
-              <Image
-                src={product.image}
-                alt={product.title}
-                fill
-                className="object-contain pointer-events-none"
-                priority
-              />
+          <div className="mb-4 lg:mb-0">
+            <div className="relative flex h-64 max-h-64 w-full select-none items-center justify-center overflow-hidden rounded-2xl bg-transparent md:h-product-image-tablet md:max-h-product-image-tablet lg:h-product-image lg:rounded-3xl">
+              {activeImage ? (
+                <>
+                  <Image
+                    key={activeImage}
+                    src={activeImage}
+                    alt={`${product.title} — фото ${safeImageIndex + 1}`}
+                    fill
+                    className="object-contain pointer-events-none"
+                    priority={safeImageIndex === 0}
+                  />
+                  {productImages.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => goToImage(-1)}
+                        aria-label="Предыдущее фото"
+                        className="absolute left-2 z-10 grid size-9 place-items-center rounded-full bg-white/85 text-main shadow-sm transition hover:bg-white"
+                      >
+                        <ChevronLeft className="size-5" strokeWidth={2.5} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => goToImage(1)}
+                        aria-label="Следующее фото"
+                        className="absolute right-2 z-10 grid size-9 place-items-center rounded-full bg-white/85 text-main shadow-sm transition hover:bg-white"
+                      >
+                        <ChevronRight className="size-5" strokeWidth={2.5} />
+                      </button>
+                      <span className="absolute bottom-2 left-1/2 z-10 -translate-x-1/2 rounded-full bg-brand-ink/55 px-2.5 py-1 text-xs font-semibold text-white">
+                        {safeImageIndex + 1} / {productImages.length}
+                      </span>
+                    </>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-second">Фото торта пока нет</p>
+              )}
+            </div>
+
+            {productImages.length > 1 && (
+              <div className="mt-2 flex flex-wrap justify-center gap-2">
+                {productImages.map((src, index) => (
+                  <button
+                    key={`${src}-${index}`}
+                    type="button"
+                    onClick={() => setActiveImageIndex(index)}
+                    aria-label={`Показать фото ${index + 1}`}
+                    aria-pressed={index === safeImageIndex}
+                    className={`relative size-12 overflow-hidden rounded-lg border-2 bg-white transition-all ${
+                      index === safeImageIndex
+                        ? 'border-accent'
+                        : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <Image
+                      src={src}
+                      alt=""
+                      fill
+                      sizes="48px"
+                      className="object-contain"
+                    />
+                  </button>
+                ))}
+              </div>
             )}
           </div>
 
@@ -160,18 +299,20 @@ export default function ProductPage() {
                 <div className="rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm md:col-span-2 lg:col-span-1 lg:rounded-3xl lg:p-5">
                   <div className="flex justify-between items-center mb-1">
                     <h4 className="font-bold text-main text-sm">Вес торта</h4>
-                    <span className="text-xs text-neutral-400 font-medium">60 BYN / кг</span>
+                    <span className="text-xs text-neutral-400 font-medium">
+                      {priceFormatter.format(basePricePerKg)} BYN / кг
+                    </span>
                   </div>
                   <div className="flex justify-between items-baseline mb-3">
                     <span className="text-xs text-neutral-400">Выбранный вес</span>
                     <span className="text-lg font-black text-accent">{weight} кг</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-medium text-second">
-                    <span>1 кг</span>
+                    <span>{minWeight} кг</span>
                     <input
                       type="range"
-                      min="1"
-                      max="5"
+                      min={minWeight}
+                      max={maxWeight}
                       step="0.5"
                       value={weight}
                       onChange={(e) => {
@@ -180,74 +321,79 @@ export default function ProductPage() {
                       }}
                       className="w-full h-1.5 bg-neutral-100 rounded-lg appearance-none cursor-pointer accent-accent"
                     />
-                    <span>5 кг</span>
+                    <span>{maxWeight} кг</span>
                   </div>
                 </div>
 
                 <div className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm">
                   <h4 className="font-bold text-main text-sm mb-3">Выбор начинки</h4>
-                  <div className="space-y-2">
-                    {[
-                      { id: 'snickers', title: '«Сникерс»', price: 0, tag: 'Базовая' },
-                      { id: 'velvet', title: '«Красный бархат»', price: 5, tag: '+5 BYN / кг' },
-                      { id: 'mango', title: '«Манго-Маракуйя»', price: 8, tag: '+8 BYN / кг' },
-                    ].map((fillingItem) => {
-                      const isSelected = filling === fillingItem.id;
-                      return (
-                        <button
-                          key={fillingItem.id}
-                          onClick={() => {
-                            setFilling(fillingItem.id);
-                            setHasConfigured(true);
-                          }}
-                          className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-xs font-bold transition-all ${isSelected
-                            ? 'bg-card border-accent text-accent'
-                            : 'bg-white border-neutral-100 text-main hover:bg-screen'
-                            }`}
-                        >
-                          <span>{fillingItem.title}</span>
-                          <span className={isSelected ? 'text-accent/80 font-medium' : 'text-neutral-400 font-medium'}>
-                            {fillingItem.tag}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {fillings.length > 0 ? (
+                    <div className="space-y-2">
+                      {fillings.map((fillingItem) => {
+                        const isSelected = filling === fillingItem;
+                        const extra = fillingPrices[normalizeOptionName(fillingItem)] ?? 0;
+                        return (
+                          <button
+                            key={fillingItem}
+                            type="button"
+                            onClick={() => {
+                              setFilling(fillingItem);
+                              setHasConfigured(true);
+                            }}
+                            className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-xs font-bold transition-all ${isSelected
+                              ? 'bg-card border-accent text-accent'
+                              : 'bg-white border-neutral-100 text-main hover:bg-screen'
+                              }`}
+                          >
+                            <span>{fillingItem}</span>
+                            <span className={isSelected ? 'text-accent/80 font-medium' : 'text-neutral-400 font-medium'}>
+                              {extra > 0 ? `+${extra} BYN / кг` : 'Базовая'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-neutral-400">Начинки не указаны.</p>
+                  )}
                 </div>
 
                 <div className="rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm lg:rounded-3xl lg:p-5">
                   <h4 className="font-bold text-main text-sm mb-3">Декор торта</h4>
-                  <div className="space-y-3">
-                    {[
-                      { id: 'berries', title: 'Свежие ягоды', price: 15 },
-                      { id: 'figures', title: 'Шоколадные фигуры', price: 20 },
-                      { id: 'photo', title: 'Печать фото', price: 10 },
-                    ].map((decorItem) => {
-                      const isChecked = decor[decorItem.id as keyof typeof decor];
-                      return (
-                        <label key={decorItem.id} className="flex items-center justify-between cursor-pointer group">
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleDecorChange(decorItem.id)}
-                              className="hidden"
-                            />
-                            <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${isChecked
-                              ? 'bg-accent border-accent'
-                              : 'border-separators bg-white group-hover:border-accent'
-                              }`}>
-                              {isChecked && (
-                                <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                              )}
+                  {decorations.length > 0 ? (
+                    <div className="space-y-3">
+                      {decorations.map((decorItem) => {
+                        const isChecked = Boolean(decor[decorItem]);
+                        const extra = decorationPrices[normalizeOptionName(decorItem)] ?? 0;
+                        return (
+                          <label key={decorItem} className="flex items-center justify-between cursor-pointer group">
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => handleDecorChange(decorItem)}
+                                className="hidden"
+                              />
+                              <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${isChecked
+                                ? 'bg-accent border-accent'
+                                : 'border-separators bg-white group-hover:border-accent'
+                                }`}>
+                                {isChecked && (
+                                  <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                                )}
+                              </div>
+                              <span className="text-xs font-semibold text-main">{decorItem}</span>
                             </div>
-                            <span className="text-xs font-semibold text-main">{decorItem.title}</span>
-                          </div>
-                          <span className="text-xs font-bold text-neutral-400 text-right">+{decorItem.price} BYN</span>
-                        </label>
-                      );
-                    })}
-                  </div>
+                            <span className="text-xs font-bold text-neutral-400 text-right">
+                              {extra > 0 ? `+${extra} BYN` : 'Бесплатно'}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-neutral-400">Декор не указан.</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -255,6 +401,7 @@ export default function ProductPage() {
             <div className="mt-4 pt-2">
               {!isConfiguring ? (
                 <button
+                  type="button"
                   onClick={() => setIsConfiguring(true)}
                   className="w-full rounded-2xl bg-accent py-3 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 md:hidden"
                 >
@@ -262,6 +409,7 @@ export default function ProductPage() {
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={() => {
                     setHasConfigured(true);
                     setIsConfiguring(false);
