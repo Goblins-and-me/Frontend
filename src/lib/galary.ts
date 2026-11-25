@@ -3,21 +3,48 @@
 import type { Cake } from "@/types/cakes";
 import throwRequestError from "@/lib/throwError";
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isOptionalStringArray(value: unknown): boolean {
+  return value === undefined || isStringArray(value);
+}
+
+function isOptionalWeight(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (typeof value === "string" &&
+      value.trim() !== "" &&
+      Number.isFinite(Number(value))) ||
+    (typeof value === "number" && Number.isFinite(value))
+  );
+}
+
 function isCake(value: unknown): value is Cake {
   if (!value || typeof value !== "object") return false;
   const product = value as Record<string, unknown>;
+
+  const hasImage =
+    typeof product.image_url === "string" ||
+    (isStringArray(product.images) && product.images.length > 0);
 
   return (
     (typeof product.id === "string" ||
       (typeof product.id === "number" && Number.isFinite(product.id))) &&
     typeof product.name === "string" &&
-    typeof product.image_url === "string" &&
+    hasImage &&
     typeof product.description === "string" &&
     ((typeof product.cake_price === "string" &&
       product.cake_price.trim() !== "" &&
       Number.isFinite(Number(product.cake_price))) ||
       (typeof product.cake_price === "number" &&
-        Number.isFinite(product.cake_price)))
+        Number.isFinite(product.cake_price))) &&
+    isOptionalStringArray(product.images) &&
+    isOptionalStringArray(product.fillings) &&
+    isOptionalStringArray(product.decorations) &&
+    isOptionalWeight(product.minWeight) &&
+    isOptionalWeight(product.maxWeight)
   );
 }
 

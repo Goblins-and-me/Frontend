@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { auth } from "@/auth";
 import throwRequestError from "@/lib/throwError"
 import type {
   AdminProductApi,
@@ -29,6 +30,11 @@ function isAdminProduct(value: unknown): value is AdminProductApi {
 }
 
 async function getBackendHeaders(includeJsonContentType = false): Promise<HeadersInit> {
+  const session = await auth();
+  if (!session?.user?.is_admin) {
+    throw new Error("Недостаточно прав для управления товарами.");
+  }
+
   const backendUrl = process.env.BACKEND_URL;
   if (!backendUrl) {
     throw new Error("Не задан адрес backend-сервера (BACKEND_URL).");
@@ -57,9 +63,26 @@ async function getBackendHeaders(includeJsonContentType = false): Promise<Header
   };
 }
 
+function assertValidProduct(product: AdminProductCreateRequest) {
+  const hasNonEmptyStrings = (values: string[]) =>
+    values.length > 0 && values.every((value) => value.trim() !== "");
+
+  if (!product.name.trim()) {
+    throw new Error("Укажите название товара.");
+  }
+  if (!hasNonEmptyStrings(product.images)) {
+    throw new Error("Добавьте хотя бы одно фото товара.");
+  }
+  if (!Number.isFinite(Number(product.cake_price))) {
+    throw new Error("Укажите корректную цену товара.");
+  }
+}
+
 export async function createAdminProduct(
   product: AdminProductCreateRequest,
 ): Promise<AdminProductApi> {
+  assertValidProduct(product);
+
   const response = await fetch(`${process.env.BACKEND_URL}/api/admin/products`, {
     method: "POST",
     headers: await getBackendHeaders(true),
@@ -72,6 +95,7 @@ export async function createAdminProduct(
   }
 
   const data: unknown = await response.json();
+  console.log("createAdminProduct response data:", data);
   const createdProduct =
     data && typeof data === "object" && "product" in data ? data.product : null;
 
@@ -86,6 +110,8 @@ export async function updateAdminProduct(
   id: string,
   product: AdminProductUpdateRequest,
 ): Promise<void> {
+  assertValidProduct(product);
+
   const response = await fetch(
     `${process.env.BACKEND_URL}/api/admin/products/${encodeURIComponent(id)}`,
     {
@@ -98,5 +124,24 @@ export async function updateAdminProduct(
 
   if (!response.ok) {
     throwRequestError("Не удалось обновить товар", response);
+  }
+}
+
+export async function deleteAdminProduct(id: string): Promise<void> {
+  if (!id) {
+    throw new Error("Не указан товар для удаления.");
+  }
+
+  const response = await fetch(
+    `${process.env.BACKEND_URL}/api/admin/products/${encodeURIComponent(id)}`,
+    {
+      method: "DELETE",
+      headers: await getBackendHeaders(),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    throwRequestError("Не удалось удалить товар", response);
   }
 }

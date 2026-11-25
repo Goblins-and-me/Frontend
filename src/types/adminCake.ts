@@ -16,13 +16,10 @@ export type AdminProductCreateRequest = {
   description: string;
   fillings: string[];
   decorations: string[];
-  minWeight: number;
-  maxWeight: number;
+  minWeight: string | number;
+  maxWeight: string | number;
   cake_price: string;
 };
 
 
-export type AdminProductUpdateRequest = Pick<
-  AdminProductCreateRequest,
-  "name" | "images" | "description" | "cake_price"
->;
+export type AdminProductUpdateRequest = AdminProductCreateRequest;

@@ -59,7 +59,7 @@ export default function Gallery() {
             Галерея тортов
           </h1>
           <span className="mt-2 block text-sm leading-relaxed text-brand-subtle">
-            Выберите торт, чтобы изменить его параметры, или добавьте новый заказ.
+            Выберите торт, чтобы изменить его параметры, или добавьте новый товар.
           </span>
         </div>
         <Link
@@ -67,7 +67,7 @@ export default function Gallery() {
           className="inline-flex min-h-11 flex-none items-center justify-center gap-2 rounded-xl bg-brand-accent px-4 text-sm font-extrabold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-accent-hover max-tablet:self-stretch"
         >
           <Plus aria-hidden="true" size={18} />
-          Новый заказ
+          Новый товар
         </Link>
       </header>
 
