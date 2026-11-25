@@ -27,7 +27,6 @@ export default function AdminProductPage() {
     description: "",
     price: 0,
     image: cakeImageOptions[0].src,
-    backgroundColor: "#f3e4fe",
     weight: 2,
     fillingId: "snickers",
     decorIds: [],
@@ -56,7 +55,6 @@ export default function AdminProductPage() {
           description: cake.description,
           price: cake.price,
           image: cake.image,
-          backgroundColor: cake.backgroundColor,
           weight: cake.weight,
           fillingId: cake.fillingId,
           decorIds: cake.decorIds,
@@ -108,9 +106,16 @@ export default function AdminProductPage() {
   if (isLoading) {
     return (
       <section className="min-h-page-below-admin-header bg-screen px-7 py-6 text-brand-ink max-wide:px-5 max-xs:px-3 max-xs:pt-4">
-        <p className="mx-auto my-10 max-w-xl rounded-2xl border border-border bg-brand-surface p-6 text-center text-sm text-brand-subtle" role="status">
-          Загружаем торт…
-        </p>
+        <div
+          className="mx-auto my-10 flex min-h-48 max-w-xl flex-col items-center justify-center gap-4 rounded-2xl border border-border bg-brand-surface p-6 text-center text-sm text-brand-subtle"
+          role="status"
+        >
+          <span
+            aria-hidden="true"
+            className="size-9 animate-spin rounded-full border-[3px] border-brand-outline/25 border-t-brand-accent"
+          />
+          <span>Загружаем карточку торта…</span>
+        </div>
       </section>
     );
   }
