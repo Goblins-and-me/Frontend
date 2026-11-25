@@ -3,68 +3,61 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { fetchAdminProducts } from "@/lib/galary";
 
 type Cake = {
   image: string;
   name: string;
-  fillings: string[];
+  description: string;
   price: number;
   link: string;
 };
 
-const cakes: Cake[] = [
-  {
-    image: "/cake-img.png",
-    name: "Шоколадный торт с ягодами",
-    fillings: ["Сникерс", "Красный бархат"],
-    price: 60,
-    link: "/product_card/1",
-  },
-  {
-    image: "/cake.png",
-    name: "Свадебный торт",
-    fillings: ["Манго-маракуйя", "Сникерс"],
-    price: 65,
-    link: "/product_card/2",
-  },
-  {
-    image: "/cake.jpg",
-    name: "Торт «Лебеди»",
-    fillings: ["Красный бархат"],
-    price: 68,
-    link: "/product_card/3",
-  },
-  {
-    image: "/cake.png",
-    name: "Торт с цветочным декором",
-    fillings: ["Сникерс", "Манго-маракуйя"],
-    price: 65,
-    link: "/product_card/4",
-  },
-  {
-    image: "/cake-img.png",
-    name: "Торт с шоколадной начинкой",
-    fillings: ["Манго-маракуйя", "Красный бархат"],
-    price: 60,
-    link: "/product_card/5",
-  },
-  {
-    image: "/cake.jpg",
-    name: "Праздничный торт с ягодами",
-    fillings: ["Сникерс"],
-    price: 70,
-    link: "/product_card/6",
-  },
-];
-
 export default function Home() {
+  const [cakes, setCakes] = useState<Cake[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  useEffect(() => {
+    let isCurrent = true;
+
+    fetchAdminProducts()
+      .then((products) => {
+        if (!isCurrent) return;
+        setCakes(
+          products.map((product) => ({
+            image: product.image_url || "/cake.png",
+            name: product.name,
+            description: product.description,
+            price: Number(product.cake_price),
+            link: `/product_card/${encodeURIComponent(String(product.id))}`,
+          })),
+        );
+      })
+      .catch((error: unknown) => {
+        if (!isCurrent) return;
+        console.error("Не удалось загрузить каталог товаров.", error);
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : "Не удалось загрузить каталог товаров.",
+        );
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoading(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
+
   const normalizedSearchTerm = searchTerm.toLocaleLowerCase("ru-RU");
   const filteredCakes = cakes.filter((cake) =>
-    [cake.name, ...cake.fillings].some((value) =>
+    [cake.name, cake.description].some((value) =>
       value.toLocaleLowerCase("ru-RU").includes(normalizedSearchTerm),
     ),
   );
@@ -135,13 +128,21 @@ export default function Home() {
             </button>
           </form>
 
-          {searchTerm && (
+          {searchTerm && !isLoading && !loadError && (
             <p className="mb-4 -mt-2.5 text-sm text-brand-muted" role="status">
               Найдено тортов: {filteredCakes.length}
             </p>
           )}
 
-          {filteredCakes.length > 0 ? (
+          {isLoading ? (
+            <p className="py-10 text-center text-sm text-brand-muted" role="status">
+              Загружаем каталог товаров…
+            </p>
+          ) : loadError ? (
+            <p className="rounded-2xl border border-brand-border bg-brand-surface px-5 py-10 text-center text-sm text-brand-muted" role="alert">
+              Не удалось загрузить каталог товаров: {loadError}
+            </p>
+          ) : filteredCakes.length > 0 ? (
             <div className="grid grid-cols-1 items-stretch gap-4 phone:max-nav:grid-cols-2 nav:grid-cols-3 nav:gap-6">
               {filteredCakes.map((cake) => (
                 <Link
@@ -164,7 +165,7 @@ export default function Home() {
                       от {cake.price} BYN
                     </p>
                     <p className="mt-1 text-xs leading-relaxed text-brand-muted">
-                      Начинки: {cake.fillings.join(", ")}
+                      {cake.description}
                     </p>
                   </div>
                 </Link>
