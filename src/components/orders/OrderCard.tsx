@@ -94,7 +94,7 @@ export default function OrderCard({
         <footer className="mt-auto flex items-center justify-between gap-4 border-t border-brand-border pt-4 text-sm font-semibold text-brand-muted">
           <span>Стоимость заказа</span>
           <strong className="whitespace-nowrap text-xl font-extrabold text-brand-ink">
-            {priceFormatter.format(order.price)} BYN
+            {priceFormatter.format(order.order_price)} BYN
           </strong>
         </footer>
       </div>

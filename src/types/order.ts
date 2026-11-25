@@ -7,7 +7,7 @@ export type UserOrder = {
   image: string;
   // placedAt: string;
   readyAt: string;
-  price: number;
+  order_price: number;
   status: UserOrderStatus;
 };
 
@@ -26,7 +26,7 @@ export type ServerResponseOrder = {
   filling: string;
   decor: string;
   weight: string;
-  order_price: string; // В JSON пришло строкой ("130"), при необходимости можно парсить в number
+  order_price: string | number;
   order_status: OrderStatus;
 }
 

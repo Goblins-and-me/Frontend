@@ -48,14 +48,21 @@ export async function fetchUsersOrders(): Promise<UserOrder[]> {
   }
 
   const data: OrdersApiResponse = await response.json();
-  return data.orders.map((order) => ({
-    id: String(order.id),
-    title: order.product.name,
-    image: order.product.image_url,
-    readyAt: order.delivery_date,
-    price: Number.parseFloat(order.order_price),
-    status: order.order_status,
-  }));
+  return data.orders.map((order) => {
+    const orderPrice = Number(order.order_price);
+    if (!Number.isFinite(orderPrice)) {
+      throw new Error(`Заказ ${order.id} содержит некорректную стоимость.`);
+    }
+
+    return {
+      id: String(order.id),
+      title: order.product.name,
+      image: order.product.image_url,
+      readyAt: order.delivery_date,
+      order_price: orderPrice,
+      status: order.order_status,
+    };
+  });
 }
 
 export async function fetchAdminOrdersGroupedByDate(): Promise<AdminOrdersByDate> {
