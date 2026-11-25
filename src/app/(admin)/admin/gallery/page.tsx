@@ -39,7 +39,7 @@ export default function Gallery() {
     if (!query) return cakes;
 
     return cakes.filter((cake) =>
-      [cake.name, cake.description, cake.flavor].some((value) =>
+      [cake.name, cake.description].some((value) =>
         value.toLocaleLowerCase("ru-RU").includes(query),
       ),
     );
@@ -105,8 +105,7 @@ export default function Gallery() {
                 name={cake.name}
                 price={cake.price}
                 image={cake.image}
-                flavor={cake.flavor}
-                backgroundColor={cake.backgroundColor}
+                description={cake.description}
                 isAdminPanel
               />
             ))}

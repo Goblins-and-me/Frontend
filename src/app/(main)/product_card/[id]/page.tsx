@@ -23,17 +23,23 @@ export default function ProductPage() {
 
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [savedProduct, setSavedProduct] = useState<AdminCake | null>(null);
+  const [loadedProductId, setLoadedProductId] = useState<string | null>(null);
+  const isLoading = loadedProductId !== id;
   const staticProduct = Products.find((item) => String(item.id) === id);
   const selectedProduct = savedProduct ?? staticProduct;
 
   useEffect(() => {
     let isCurrent = true;
+
     getAdminCake(id)
       .then((cake) => {
         if (isCurrent) setSavedProduct(cake);
       })
       .catch((error: unknown) => {
         console.error("Не удалось загрузить сохранённые данные товара.", error);
+      })
+      .finally(() => {
+        if (isCurrent) setLoadedProductId(id);
       });
 
     return () => {
@@ -59,6 +65,23 @@ export default function ProductPage() {
 
     return Math.round(totalPrice);
   };
+
+  if (isLoading) {
+    return (
+      <main className="flex min-h-page-below-header items-center justify-center bg-screen px-6 text-brand-ink">
+        <div
+          className="flex min-h-48 w-full max-w-xl flex-col items-center justify-center gap-4 rounded-2xl border border-brand-border bg-brand-surface p-6 text-center text-sm text-brand-muted"
+          role="status"
+        >
+          <span
+            aria-hidden="true"
+            className="size-9 animate-spin rounded-full border-[3px] border-brand-outline/25 border-t-brand-accent"
+          />
+          <span>Загружаем карточку торта…</span>
+        </div>
+      </main>
+    );
+  }
 
   if (!selectedProduct) {
     return (
