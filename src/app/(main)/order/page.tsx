@@ -1,21 +1,37 @@
+"use client";
+
 import Link from "next/link";
-import { getUserOrders } from "@/services/OrderService";
-import { UserOrder } from "@/types/order";
+import { getUserOrders } from "./actions";
+import type { UserOrder } from "@/types/order";
 import OrderCard from "@/components/orders/OrderCard";
-import { redirect } from "next/navigation";
+import { useState, useEffect } from "react";
 
 
 
-export default async function OrderPage() {
+export default function OrderPage() {
 
-  let orders: UserOrder[] = [];
+  const [orders, setOrders] = useState<UserOrder[]>([]);
 
-  try {
-    orders = await getUserOrders();
-  }
-  catch (error) {
-    console.error("Error fetching user orders:", error);
-  }
+  useEffect(() => {
+    let isCurrent = true;
+
+    getUserOrders()
+      .then((fetchedOrders) => {
+        if (isCurrent) setOrders(fetchedOrders);
+      })
+      .catch((error: unknown) => {
+        console.error("Не удалось загрузить заказы пользователя.", error);
+        if (isCurrent) {
+          setOrders([]);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+
+  }, []);
+
 
 
   return (
