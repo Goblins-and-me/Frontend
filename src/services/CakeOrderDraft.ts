@@ -1,5 +1,5 @@
 export type CakeOrderDraft = {
-  productId: number;
+  productId: string;
   title: string;
   description: string;
   image: string;
@@ -16,7 +16,7 @@ function isCakeOrderDraft(value: unknown): value is CakeOrderDraft {
 
   const draft = value as Record<string, unknown>;
   return (
-    typeof draft.productId === "number" &&
+    typeof draft.productId === "string" &&
     typeof draft.title === "string" &&
     typeof draft.description === "string" &&
     typeof draft.image === "string" &&

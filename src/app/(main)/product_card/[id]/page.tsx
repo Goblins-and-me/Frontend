@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from "react";
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { Products } from '@/services/ProductService';
+import { saveCakeOrderDraft } from '@/services/CakeOrderDraft';
 import { getProductCard } from './actions';
 import type { ProductCard } from '@/types/productCard';
 
@@ -49,6 +50,7 @@ function normalizeOptionName(value: string): string {
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
 
   const [weight, setWeight] = useState<number>(1);
   const [filling, setFilling] = useState<string>(fallbackFillings[0]);
@@ -56,6 +58,7 @@ export default function ProductPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isConfiguring, setIsConfiguring] = useState<boolean>(false);
   const [hasConfigured, setHasConfigured] = useState<boolean>(false);
+  const [orderDraftError, setOrderDraftError] = useState("");
 
   const [productCard, setProductCard] = useState<ProductCard | null>(null);
   const [loadedProductId, setLoadedProductId] = useState<string | null>(null);
@@ -184,13 +187,32 @@ export default function ProductPage() {
     return Math.round((basePricePerKg + fillingExtraPerKg) * weight + decorationsCost);
   };
 
-  const priceText = `${priceFormatter.format(
+  const orderPrice =
     isConfiguring || hasConfigured
       ? calculatePrice()
       : Number.isFinite(productPrice)
         ? productPrice
-        : 0,
-  )} BYN`;
+        : 0;
+  const priceText = `${priceFormatter.format(orderPrice)} BYN`;
+
+  const handlePlaceOrder = () => {
+    try {
+      saveCakeOrderDraft({
+        productId: selectedProduct.id,
+        title: selectedProduct.name,
+        description: selectedProduct.description,
+        image: activeImage || "/cake.png",
+        weight,
+        filling,
+        decor: decorations.filter((item) => decor[item]),
+        price: orderPrice,
+      });
+      router.push("/placing_order");
+    } catch (error) {
+      console.error("Не удалось сохранить конфигурацию торта для заказа.", error);
+      setOrderDraftError("Не удалось подготовить заказ. Попробуйте ещё раз.");
+    }
+  };
 
   const product = {
     title: selectedProduct.name,
@@ -421,14 +443,23 @@ export default function ProductPage() {
               )}
             </div>
 
+            {orderDraftError && (
+              <p className="mt-3 text-sm text-red-600" role="alert">
+                {orderDraftError}
+              </p>
+            )}
             <footer className={`flex items-center justify-between border-t border-neutral-100 p-5 backdrop-blur-md${isConfiguring ? " hidden md:flex" : ""} lg:mt-6 lg:border-t-brand-border lg:bg-transparent lg:px-0 lg:pt-5 lg:pb-0 lg:backdrop-blur-none`}>
               <div className="flex flex-col">
                 <span className="mb-0.5 text-xs font-bold uppercase tracking-wider text-neutral-400">Стоимость:</span>
                 <span className="text-lg font-black text-main leading-none">{product.price_sea}</span>
               </div>
-              <Link href="/placing_order" className="rounded-2xl bg-accent px-6 py-3.5 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 lg:whitespace-nowrap">
+              <button
+                type="button"
+                onClick={handlePlaceOrder}
+                className="rounded-2xl bg-accent px-6 py-3.5 text-sm font-bold tracking-wide text-white shadow-sm transition-all duration-200 hover:opacity-90 active:scale-95 lg:whitespace-nowrap"
+              >
                 Заказать торт
-              </Link>
+              </button>
             </footer>
           </div>
         </div>
