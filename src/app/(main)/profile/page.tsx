@@ -1,7 +1,8 @@
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { CakeSlice, LogOut, Mail, ShoppingBag, Trash2, UserRound } from "lucide-react";
+import { CakeSlice, LogOut, Mail, ShoppingBag, UserRound } from "lucide-react";
+import DeleteAccountModal from "@/components/profile/DeleteAccountModal";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -11,6 +12,7 @@ export default async function ProfilePage() {
   }
 
   const displayName = session.user.name?.trim() || "Пользователь";
+  const phone = session.user.phone?.trim() || "Телефон не указан";
   const email = session.user.email || "Email не указан";
   const avatarInitial = (session.user.name?.trim() || session.user.email || "П")
     .charAt(0)
@@ -22,10 +24,10 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main className="min-h-[calc(100vh-74px)] bg-screen px-5 py-8 text-main sm:px-8 sm:py-12">
+    <main className="min-h-page-below-header bg-screen px-5 py-8 text-main sm:px-8 sm:py-12">
       <div className="mx-auto w-full max-w-3xl">
         <header className="mb-7 sm:mb-9">
-          <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.12em] text-accent">
+          <p className="mb-2 text-xs font-extrabold uppercase tracking-widest text-accent">
             Sweet Story
           </p>
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -98,11 +100,11 @@ export default async function ProfilePage() {
 
             <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-screen p-4">
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-accent">
-                <CakeSlice aria-hidden="true" size={19} />
+                <Mail aria-hidden="true" size={19} />
               </span>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-second">Любимый десерт</p>
-                <p className="truncate text-sm font-bold text-second">Пока не указан</p>
+                <p className="text-xs font-medium text-second">Номер телефона</p>
+                <p className="truncate text-sm font-bold">{phone}</p>
               </div>
             </div>
           </div>
@@ -130,19 +132,7 @@ export default async function ProfilePage() {
               </button>
             </form>
 
-            <div>
-              <button
-                type="button"
-                disabled
-                className="flex min-h-12 w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-border bg-screen px-4 text-sm font-bold text-second opacity-70"
-              >
-                <Trash2 aria-hidden="true" size={17} />
-                Удалить аккаунт
-              </button>
-              <p className="mt-2 text-center text-xs text-second">
-                Удаление аккаунта пока недоступно.
-              </p>
-            </div>
+            <DeleteAccountModal />
           </div>
         </section>
       </div>

@@ -13,12 +13,12 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="site-shell">
-      <header className="site-header">
+    <div className="min-h-screen bg-screen text-brand-ink max-phone:pb-20">
+      <header className="relative z-10 px-5 pt-4 pb-2.5 phone:px-6 phone:py-5 nav:px-8 nav:py-6">
         <Header />
       </header>
       {children}
-      <div className="mobile-footer">
+      <div className="hidden max-phone:block">
         <Footer />
       </div>
     </div>

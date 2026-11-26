@@ -33,20 +33,29 @@ export async function createOrder(payload: CreateOrderRequest) {
     return { success: false, message: "Не задан BACKEND_URL в .env" };
   }
 
-  // Если не работает поменяйте "token" на коректное название
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const accessToken = cookieStore.get("access_token")?.value;
+  const refreshToken = cookieStore.get("refresh_token")?.value;
 
-  if (!token) {
+  if (!accessToken) {
     return { success: false, message: "Пользователь не авторизован" };
   }
+
+  const cookieHeader = [
+    `access_token=${accessToken}`,
+    refreshToken ? `refresh_token=${refreshToken}` : null,
+  ]
+    .filter((cookie): cookie is string => cookie !== null)
+    .join("; ");
 
   try {
     const response = await fetch(`${backendUrl}/api/orders`, {
       method: "POST",
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
+        Cookie: cookieHeader,
       },
       body: JSON.stringify(payload),
       cache: "no-store",
