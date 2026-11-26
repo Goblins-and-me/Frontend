@@ -1,4 +1,4 @@
-export type KnownOrderStatus = 'preparing' | 'completed' | 'cancelled' | 'ready';
+export type KnownOrderStatus = 'pending' | 'completed' | 'cancelled' | 'ready';
 export type UserOrderStatus = KnownOrderStatus | string;
 
 export type UserOrder = {
@@ -34,6 +34,28 @@ export interface OrdersApiResponse {
   orders: ServerResponseOrder[];
 }
 
+export interface CustomerInfo {
+  name: string;
+  phone: string;
+  email: string;
+}
+
+export interface OrderAdminResponse {
+  id: string;
+  delivery_date: string;
+  product_name: string;
+  custormer: CustomerInfo;
+  filling: string;
+  decor: string;
+  weight: string;
+  order_price: string | number;
+  order_status: OrderStatus;
+} 
+
+export interface OrdersAdminResponse {
+  orders: OrderAdminResponse[];
+}
+
 export interface AdminCalendarOrder {
   id: string;
   order_status: string;
@@ -57,3 +79,12 @@ export type OrderStatusUpdateResponse = {
   order_id: string,
   new_status: string
 }
+
+export type AdminUserOrder = {
+  id: string;
+  title: string;
+  // placedAt: string;
+  readyAt: string;
+  order_price: number;
+  status: UserOrderStatus;
+};

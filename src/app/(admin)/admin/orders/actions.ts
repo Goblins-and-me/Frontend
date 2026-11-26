@@ -9,7 +9,7 @@ import {
 import type { KnownOrderStatus } from "@/types/order";
 
 const orderStatuses: KnownOrderStatus[] = [
-  "preparing",
+  "pending",
   "ready",
   "completed",
   "cancelled",

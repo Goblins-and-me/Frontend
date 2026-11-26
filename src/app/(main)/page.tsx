@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { fetchAdminProducts } from "@/lib/galary";
+import heroCake from "../../../public/cake.jpg";
 
 type Cake = {
   image: string;
@@ -89,7 +90,7 @@ export default function Home() {
           </div>
           <div className="h-60 overflow-hidden rounded-3xl bg-brand-soft phone:h-75 nav:h-90 max-phone:rounded-2xl">
             <Image
-              src="/cake.jpg"
+              src={heroCake}
               alt="Праздничный торт ручной работы"
               width={920}
               height={560}

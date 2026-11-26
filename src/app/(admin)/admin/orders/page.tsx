@@ -6,34 +6,34 @@ import {
   loadAdminOrders,
   removeAdminOrder,
 } from "./actions";
-import type { KnownOrderStatus, UserOrder } from "@/types/order";
+import type { AdminUserOrder, KnownOrderStatus, UserOrder } from "@/types/order";
 
 type Filter = "all" | KnownOrderStatus;
 
 const filters: { label: string; value: Filter }[] = [
   { label: "Все", value: "all" },
-  { label: "В очереди", value: "preparing" },
+  { label: "В очереди", value: "pending" },
   { label: "Готовы", value: "ready" },
   { label: "Завершены", value: "completed" },
   { label: "Отменены", value: "cancelled" },
 ];
 
 const statusOptions: { label: string; value: KnownOrderStatus }[] = [
-  { label: "В очереди", value: "preparing" },
+  { label: "В очереди", value: "pending" },
   { label: "Готов", value: "ready" },
   { label: "Завершён", value: "completed" },
   { label: "Отменён", value: "cancelled" },
 ];
 
 const statusLabels: Record<KnownOrderStatus, string> = {
-  preparing: "В очереди",
+  pending: "В очереди",
   ready: "Готов",
   completed: "Завершён",
   cancelled: "Отменён",
 };
 
 const statusStyles: Record<KnownOrderStatus, string> = {
-  preparing: "bg-card text-accent",
+  pending: "bg-card text-accent",
   ready: "bg-screen text-calendar-free",
   completed: "bg-screen text-second",
   cancelled: "bg-card text-second",
@@ -58,7 +58,7 @@ function formatOrderDate(date: string): string {
 }
 
 export default function Orders() {
-  const [orders, setOrders] = useState<UserOrder[]>([]);
+  const [orders, setOrders] = useState<AdminUserOrder[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
