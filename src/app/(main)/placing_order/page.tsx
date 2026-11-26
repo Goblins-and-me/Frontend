@@ -1,22 +1,24 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
-  CakeSlice,
   Check,
-  Clock3,
-  MapPin,
   MessageSquareText,
   PackageCheck,
 } from "lucide-react";
 import Calendar from "@/components/calendar/Calendar";
+import { createOrder } from "./actions";
 import { consumeCakeOrderDraft, type CakeOrderDraft } from "@/services/CakeOrderDraft";
 
-const defaultCake = {
+type OrderCake = Omit<CakeOrderDraft, "productId"> & { productId: string };
+
+const defaultCake: OrderCake = {
+  productId: "",
   title: "Торт «Сникерс»",
   description: "Нежный торт со свежими ягодами.",
   image: "/cake.png",
@@ -26,38 +28,54 @@ const defaultCake = {
   price: 67,
 };
 
-function toOrderCake(draft: CakeOrderDraft) {
-  return {
-    title: draft.title,
-    description: draft.description,
-    image: draft.image,
-    filling: draft.filling,
-    weight: draft.weight,
-    decor: draft.decor,
-    price: draft.price,
-  };
-}
-
 const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
   day: "numeric",
   month: "long",
   year: "numeric",
 });
 
-export default function PlacingOrder() {
+function formatDisplayDate(date: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return "";
+
+  const parsedDate = new Date(`${date}T00:00:00`);
+  return Number.isNaN(parsedDate.getTime()) ? "" : dateFormatter.format(parsedDate);
+}
+
+function OrderContent() {
+  const searchParams = useSearchParams();
+  const queryDecor = searchParams.get("decor");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [inscription, setInscription] = useState("");
   const [pickupDate, setPickupDate] = useState("");
   const [showCalendar, setShowCalendar] = useState(false);
-  const [cake, setCake] = useState(defaultCake);
+  const [cake, setCake] = useState<OrderCake>(() => {
+    const weight = Number(searchParams.get("weight"));
+    const price = Number(searchParams.get("price"));
+
+    return {
+      ...defaultCake,
+      productId: searchParams.get("product_id") ?? "",
+      filling: searchParams.get("filling") ?? defaultCake.filling,
+      weight: Number.isFinite(weight) && weight > 0 ? weight : defaultCake.weight,
+      decor: queryDecor
+        ? queryDecor.split(",").map((item) => item.trim()).filter(Boolean)
+        : defaultCake.decor,
+      price: Number.isFinite(price) && price > 0 ? price : defaultCake.price,
+    };
+  });
   const [draftError, setDraftError] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       try {
         const draft = consumeCakeOrderDraft();
-        if (draft) setCake(toOrderCake(draft));
+        if (draft) {
+          setCake(draft);
+        }
       } catch (error) {
         console.error("Не удалось загрузить конфигурацию торта.", error);
         setDraftError("Не удалось загрузить выбранную конфигурацию торта.");
@@ -67,9 +85,61 @@ export default function PlacingOrder() {
     return () => window.clearTimeout(timeoutId);
   }, []);
 
-  const formattedPickupDate = pickupDate
-    ? dateFormatter.format(new Date(`${pickupDate}T00:00:00`))
-    : null;
+  const formattedPickupDate = formatDisplayDate(pickupDate);
+
+  const handleSubmit = async () => {
+    setSubmitError("");
+    setSuccessMessage("");
+
+    if (!name.trim()) {
+      setSubmitError("Укажите ваше имя.");
+      return;
+    }
+    if (!phone.trim()) {
+      setSubmitError("Укажите номер телефона.");
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(pickupDate) || !formattedPickupDate) {
+      setSubmitError("Выберите дату самовывоза.");
+      return;
+    }
+    if (!cake.productId) {
+      setSubmitError("Не удалось определить выбранный торт. Вернитесь в каталог и выберите товар ещё раз.");
+      return;
+    }
+
+    const decor = cake.decor.length > 0 ? cake.decor.join(", ") : "Без декора";
+    const fullDecor = inscription.trim()
+      ? `${decor} и надпись «${inscription.trim()}»`
+      : decor;
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await createOrder({
+        delivery_date: pickupDate,
+        product_id: cake.productId,
+        filling: cake.filling,
+        decor: fullDecor,
+        weight: String(cake.weight),
+      });
+
+      if (result.success) {
+        setSuccessMessage(
+          result.order?.id
+            ? `${result.message} Номер заказа: ${result.order.id}`
+            : result.message,
+        );
+      } else {
+        setSubmitError(result.message);
+      }
+    } catch (error) {
+      console.error("Не удалось отправить заказ.", error);
+      setSubmitError("Не удалось отправить заказ. Попробуйте ещё раз.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="min-h-page-below-header bg-screen px-4 py-6 text-main sm:px-8 sm:py-10">
@@ -161,68 +231,16 @@ export default function PlacingOrder() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-4 rounded-2xl bg-screen p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-accent shadow-sm">
-                    <MapPin aria-hidden="true" size={18} />
-                  </span>
-                  <div>
-                    <p className="text-xs font-medium text-second">Самовывоз</p>
-                    <p className="mt-0.5 text-sm font-bold">
-                      {formattedPickupDate ?? "Дата ещё не выбрана"}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowCalendar(true)}
-                  aria-haspopup="dialog"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-white transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                >
-                  <CalendarDays aria-hidden="true" size={17} />
-                  {pickupDate ? "Изменить дату" : "Выбрать дату"}
-                </button>
-              </div>
-
-              <p className="mt-4 flex items-center gap-2 text-xs leading-5 text-second">
-                <Clock3 aria-hidden="true" className="shrink-0" size={15} />
-                Точное время самовывоза согласуем по телефону.
-              </p>
-            </section>
-
-            <section
-              aria-labelledby="inscription-heading"
-              className="rounded-3xl border border-border bg-white p-5 shadow-sm sm:p-7"
-            >
-              <div className="mb-5 flex items-start gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-accent">
-                  <CakeSlice aria-hidden="true" size={19} />
+              <button
+                type="button"
+                onClick={() => setShowCalendar(true)}
+                className="flex min-h-12 w-full items-center justify-between rounded-xl border border-border bg-white px-4 text-left text-sm transition hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              >
+                <span className={formattedPickupDate ? "font-semibold" : "text-second"}>
+                  {formattedPickupDate || "Выберите дату самовывоза"}
                 </span>
-                <div>
-                  <h2 id="inscription-heading" className="text-base font-extrabold">
-                    Пожелания к заказу
-                  </h2>
-                  <p className="mt-1 text-xs leading-5 text-second">
-                    Добавьте надпись на торт, если она нужна.
-                  </p>
-                </div>
-              </div>
-
-              <label className="grid gap-2 text-sm font-semibold text-main">
-                Надпись на торте
-                <input
-                  type="text"
-                  name="inscription"
-                  value={inscription}
-                  onChange={(event) => setInscription(event.target.value)}
-                  maxLength={60}
-                  placeholder="Например, «С днём рождения!»"
-                  className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm font-normal outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15"
-                />
-              </label>
-              <p className="mt-2 text-right text-xs text-second">
-                {inscription.length}/60
-              </p>
+                <CalendarDays aria-hidden="true" className="text-accent" size={18} />
+              </button>
             </section>
           </div>
 
@@ -278,10 +296,21 @@ export default function PlacingOrder() {
                 <div className="flex items-center justify-between gap-4">
                   <dt className="text-second">Самовывоз</dt>
                   <dd className="max-w-3/5 text-right font-semibold">
-                    {formattedPickupDate ?? "Выберите дату"}
+                    {formattedPickupDate || "Выберите дату"}
                   </dd>
                 </div>
               </dl>
+
+              <label className="mt-5 grid gap-2 text-sm font-semibold text-main">
+                Надпись на торте
+                <input
+                  type="text"
+                  value={inscription}
+                  onChange={(event) => setInscription(event.target.value)}
+                  placeholder="Например, С днём рождения!"
+                  className="h-11 w-full rounded-xl border border-border bg-white px-4 text-sm font-normal outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15"
+                />
+              </label>
 
               <div className="my-5 border-t border-dashed border-border" />
 
@@ -297,13 +326,25 @@ export default function PlacingOrder() {
                   {draftError}
                 </p>
               )}
+              {submitError && (
+                <p className="mt-3 text-sm font-medium text-red-600" role="alert">
+                  {submitError}
+                </p>
+              )}
+              {successMessage && (
+                <p className="mt-3 text-sm font-medium text-green-700" role="status">
+                  {successMessage}
+                </p>
+              )}
 
               <button
                 type="button"
-                className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-white transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                disabled={isSubmitting}
+                className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-white transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={handleSubmit}
               >
                 <Check aria-hidden="true" size={17} />
-                Отправить заказ
+                {isSubmitting ? "Отправка..." : "Отправить заказ"}
               </button>
               <p className="mt-3 text-center text-xs leading-5 text-second">
                 Мы свяжемся с вами для подтверждения заказа.
@@ -329,5 +370,13 @@ export default function PlacingOrder() {
         />
       )}
     </main>
+  );
+}
+
+export default function PlacingOrder() {
+  return (
+    <Suspense fallback={<p className="p-4">Загрузка данных заказа...</p>}>
+      <OrderContent />
+    </Suspense>
   );
 }

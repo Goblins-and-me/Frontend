@@ -2,10 +2,11 @@ import { cookies } from "next/headers";
 import {
   type AdminOrdersByDate,
   type GroupedAdminOrdersApiResponse,
-  type OrdersApiResponse,
+  type OrderAdminResponse,
   type KnownOrderStatus,
   type OrderStatusUpdateResponse,
-  type UserOrder,
+  type AdminUserOrder,
+  OrdersAdminResponse,
 } from "@/types/order";
 
 async function getBackendHeaders(includeJsonContentType = false): Promise<HeadersInit> {
@@ -36,7 +37,7 @@ function throwRequestError(action: string, response: Response): never {
   throw new Error(`${action} (HTTP ${response.status})`);
 }
 
-export async function fetchUsersOrders(): Promise<UserOrder[]> {
+export async function fetchUsersOrders(): Promise<AdminUserOrder[]> {
   const response = await fetch(`${process.env.BACKEND_URL}/api/admin/orders`, {
     method: "GET",
     headers: await getBackendHeaders(),
@@ -47,7 +48,7 @@ export async function fetchUsersOrders(): Promise<UserOrder[]> {
     throwRequestError("Не удалось загрузить заказы", response);
   }
 
-  const data: OrdersApiResponse = await response.json();
+  const data: OrdersAdminResponse = await response.json();
   return data.orders.map((order) => {
     const orderPrice = Number(order.order_price);
     if (!Number.isFinite(orderPrice)) {
@@ -56,8 +57,7 @@ export async function fetchUsersOrders(): Promise<UserOrder[]> {
 
     return {
       id: String(order.id),
-      title: order.product.name,
-      image: order.product.image_url,
+      title: order.product_name,
       readyAt: order.delivery_date,
       order_price: orderPrice,
       status: order.order_status,

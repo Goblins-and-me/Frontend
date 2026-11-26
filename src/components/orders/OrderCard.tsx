@@ -16,14 +16,14 @@ const priceFormatter = new Intl.NumberFormat("ru-RU", {
 });
 
 const statusLabels: Record<KnownOrderStatus, string> = {
-  preparing: "Готовится",
+  pending: "Готовится",
   ready: "Готов к выдаче",
   completed: "Завершён",
   cancelled: "Отменён",
 };
 
 const statusClasses: Record<KnownOrderStatus, string> = {
-  preparing: "bg-amber-50 text-amber-800",
+  pending: "bg-amber-50 text-amber-800",
   ready: "bg-emerald-50 text-emerald-800",
   completed: "bg-stone-100 text-stone-700",
   cancelled: "bg-rose-50 text-rose-800",
@@ -72,11 +72,11 @@ export default function OrderCard({
         </div>
 
         <div className="my-5 grid grid-cols-2 gap-3 max-xs:grid-cols-1 max-xs:my-4">
-          <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-screen p-3">
+          {/* <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-screen p-3">
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-card text-brand-highlight">
               <Clock3 aria-hidden="true" size={17} />
             </span>
-          </div>
+          </div> */}
 
           <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-screen p-3">
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-card text-brand-highlight">
