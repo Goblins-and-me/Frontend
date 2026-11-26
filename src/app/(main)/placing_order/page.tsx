@@ -3,11 +3,12 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Console } from "console";
+import { createOrder } from "./actions";
 
 const DatePicker = dynamic(() => import("@/components/calendar/Calendar"));
 
 interface CakeOrder {
+  product_id: string;
   filling: string;
   weight: string;
   decor: string;
@@ -43,6 +44,7 @@ function OrderContent() {
     decor: searchParams.get("decor") ?? "Без декора",
     date: "---",
     price: searchParams.get("price") ?? "Некорректный ввод",
+    product_id: searchParams.get("product_id") ?? "",
   };
 
   const [name, setName] = useState("");
@@ -50,6 +52,44 @@ function OrderContent() {
   const [inscription, setInscription] = useState("");
   const [pickupDate, setPickupDate] = useState("---");
   const [showCalendar, setShowCalendar] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (name.trim().length <= 0) {
+      ErorAlert("name");
+      return;
+    }
+    if (phone.trim().length <= 0) {
+      ErorAlert("phone");
+      return;
+    }
+    if (pickupDate.includes("--")) {
+      ErorAlert("date");
+      return;
+    }
+
+    const fullDecor = inscription.trim()
+      ? `${Cake.decor} и надпись «${inscription.trim()}»`
+      : Cake.decor;
+
+    setIsSubmitting(true);
+
+    const result = await createOrder({
+      delivery_date: pickupDate,
+      product_id: Cake.product_id,
+      filling: Cake.filling,
+      decor: fullDecor,
+      weight: Cake.weight,
+    });
+
+    setIsSubmitting(false);
+
+    if (result.success) {
+      alert(`${result.message}! Номер заказа: ${result.order?.id ?? ""}`);
+    } else {
+      alert(result.message);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-orderBg cont">
@@ -170,10 +210,11 @@ function OrderContent() {
         <div className="fixed bottom-17 w-full left-0 px-4 flex justify-center">
           <button
             type="button"
-            className="w-full rounded-2xl bg-rose-300 py-3 text-base font-bold text-white cont"
-            onClick={() => BDPOSTOrder(Cake, name, phone, inscription, pickupDate)}
+            disabled={isSubmitting}
+            className="w-full rounded-2xl bg-rose-300 py-3 text-base font-bold text-white cont disabled:opacity-50"
+            onClick={handleSubmit}
           >
-            Отправить заказ
+            {isSubmitting ? "Отправка..." : "Отправить заказ"}
           </button>
         </div>
       </div>
@@ -189,29 +230,6 @@ export default function PlacingOrder() {
   );
 }
 
-function BDPOSTOrder(Cake: CakeOrder, name: string, phone: string, inscription: string, pickupDate: string)
-{
-  if(name.length <= 0)
-  {
-    ErorAlert("name");
-    return
-  }
-  if(phone.length <= 0)
-  {
-    ErorAlert("phone");
-    return
-  }
-  if(pickupDate.includes("--"))
-  {
-    ErorAlert("date");
-    return
-  }
-  Cake.date = pickupDate;
-  
-  
-}
-
-function ErorAlert( ErorTipe:string)
-{
-  alert("заполните форму - " + ErorTipe)                         // обработчик ошибок, временно Alert   (мб будет объект с ключами-типами ошибок и полями обработчиками, можно вынести в другой файл и все обработки ошибок делать через него) 
+function ErorAlert(ErorTipe: string) {
+  alert("заполните форму - " + ErorTipe);
 }

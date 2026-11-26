@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8006";
+/*const BASE_URL = "http://localhost:8006";
 
 export async function createOrder(orderData) {
   const response = await fetch(`${BASE_URL}/v1/orders`, {
@@ -20,3 +20,4 @@ export async function createOrder(orderData) {
 
   return response.json();
 }
+*/
